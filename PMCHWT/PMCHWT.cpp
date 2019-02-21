@@ -31,10 +31,59 @@ using namespace Eigen;
 
 typedef Matrix<COMPLEX, Dynamic, Dynamic> MatrixXCPL;
 
+
+
+
+void send_data(vector<COMPLEX> &local_data, int SIZE, int numprocs, int my_rank) {
+
+	MPI_Send(&local_data[0], SIZE, MPI_DOUBLE_COMPLEX, 0, 1, MPI_COMM_WORLD);
+}
+
+void receive_data(vector<COMPLEX> &A11, vector<COMPLEX> &A12, vector<COMPLEX> &A21, vector<COMPLEX> &A22, int SIZE, int numprocs) {
+
+	int n = sqrt(SIZE);
+
+	vector<COMPLEX> temp(SIZE);
+
+	for (int rank = 1; rank < numprocs; ++rank) {
+
+		MPI_Recv(&temp[0], SIZE, MPI_DOUBLE_COMPLEX, rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+		for (int j1 = 0; j1 < n; ++j1) {
+
+
+			for (int j2 = 0; j2 != n; ++j2) {
+
+				if ((rank == 1) || (rank == 2))
+				A11[j1*n + j2] += temp[j1*n + j2];
+
+				if ((rank == 3) || (rank == 4))
+				A12[j1*n + j2] += temp[j1*n + j2];
+
+				if ((rank == 5) || (rank == 6))
+				A21[j1*n + j2] += temp[j1*n + j2];
+
+				if ((rank == 7) || (rank == 8))
+				A22[j1*n + j2] += temp[j1*n + j2];
+
+
+			}
+
+		}
+
+	}
+}
+
+
+
+
+
+
+
 int main(int args, char *argv[]) {
 	int my_rank, numprocs;
 
-
+	//program ce lokalno raditi na 9 procesa, 1 master i 8 slavea, svaka matrica ce se racunati sa dva procesa
 
 	// MPI initialization
 	MPI_Init(&args, &argv);
@@ -159,25 +208,44 @@ int main(int args, char *argv[]) {
 	MatrixXCPL A(2*maxele, 2*maxele);
 
 	Points points;
-	cout << "Calculating .." << endl;
 
-	auto begin = std::chrono::high_resolution_clock::now();
+	
 
-	assemble_system_matrixEFIE(A1E, mesh, Triangles, points, Nt, maxele, k0, eta0);
-	assemble_system_matrixEFIE(A2E, mesh, Triangles, points, Nt, maxele, k2, eta2);
+    if((my_rank==1)|| (my_rank == 2)){
+	assemble_system_matrixEFIE(A1El, mesh, Triangles, points, Nt, maxele, k0, eta0);
+	    send_data(A1El, SIZE, numprocs, my_rank);
+    }
+	if ((my_rank == 3) || (my_rank == 4)){
+		assemble_system_matrixEFIE(A2El, mesh, Triangles, points, Nt, maxele, k2, eta2); 
+		send_data(A2El, SIZE, numprocs, my_rank);
+	}
 
-	assemble_system_matrixMFIE(A1M, mesh, Triangles, points, Nt, maxele, k0);
-	assemble_system_matrixMFIE(A2M, mesh, Triangles, points, Nt, maxele, k2);
+	if ((my_rank == 5) || (my_rank == 6)){
+		assemble_system_matrixMFIE(A1Ml, mesh, Triangles, points, Nt, maxele, k0); 
+		send_data(A1Ml, SIZE, numprocs, my_rank);
+	}
 
-	auto end = std::chrono::high_resolution_clock::now();
+	if ((my_rank == 7) || (my_rank == 8)){
+	assemble_system_matrixMFIE(A2Ml, mesh, Triangles, points, Nt, maxele, k2);
+       send_data(A2Ml, SIZE, numprocs, my_rank);
+}
+		
+
+	if (my_rank == 0) {
+
+       auto begin = std::chrono::high_resolution_clock::now();
+
+		receive_data(A1Eg,A2Eg,A1Mg,A2Mg,maxele, numprocs);
+
+	   auto end = std::chrono::high_resolution_clock::now();
 
 	for (int i = 0; i < maxele; ++i) {
 		for (int j = 0; j < maxele; ++j) {
 
-			A11(i,j) = A1E[i*maxele + j] + A2E[i*maxele + j];
-			A12(i,j) = -A1M[i*maxele + j] - A2M[i*maxele + j];
-			A21(i,j) = A1M[i*maxele + j] + A2M[i*maxele + j];
-			A22(i,j) = (COMPLEX(1)/ pow(eta0,2))*A1E[i*maxele + j] + (COMPLEX(1) / pow(eta2, 2))*A2E[i*maxele + j];
+			A11(i,j) = A1Eg[i*maxele + j] + A2Eg[i*maxele + j];
+			A12(i,j) = -A1Mg[i*maxele + j] - A2Mg[i*maxele + j];
+			A21(i,j) = A1Mg[i*maxele + j] + A2Mg[i*maxele + j];
+			A22(i,j) = (COMPLEX(1)/ pow(eta0,2))*A1Eg[i*maxele + j] + (COMPLEX(1) / pow(eta2, 2))*A2Eg[i*maxele + j];
 		}
 	}
 
@@ -186,9 +254,15 @@ int main(int args, char *argv[]) {
 	A.block(maxele, 0, maxele, maxele) = eta0*A21;
 	A.block(maxele, maxele, maxele, maxele) =pow(eta0,2)*A22;
 
-	cout << A(2, 0) << endl;
 
-	std::cout << 1.0*std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / 1e9 << "s" << std::endl;
+cout << A(2, 0) << endl;
+
+std::cout << 1.0*std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / 1e9 << "s" << std::endl;
+
+}
+
+
+	
 
 	MPI_Finalize();
 
