@@ -131,15 +131,25 @@ int main(int args, char *argv[]) {
 
 	int SIZE = maxele*maxele;
 
-	vector<COMPLEX> A1E(SIZE);
-	vector<COMPLEX> A2E(SIZE);
-	vector<COMPLEX> A1M(SIZE);
-	vector<COMPLEX> A2M(SIZE);
+	vector<COMPLEX> A1Eg(SIZE);
+	vector<COMPLEX> A2Eg(SIZE); //globalne matrice
+	vector<COMPLEX> A1Mg(SIZE);
+	vector<COMPLEX> A2Mg(SIZE);
 
-	fill(A1E.begin(), A1E.end(), COMPLEX(0));
-	fill(A2E.begin(), A2E.end(), COMPLEX(0));
-	fill(A1M.begin(), A1M.end(), COMPLEX(0));
-	fill(A2M.begin(), A2M.end(), COMPLEX(0));
+	vector<COMPLEX> A1El(SIZE);
+	vector<COMPLEX> A2El(SIZE); //lokalne matrice
+	vector<COMPLEX> A1Ml(SIZE);
+	vector<COMPLEX> A2Ml(SIZE);
+
+	fill(A1Eg.begin(), A1Eg.end(), COMPLEX(0));
+	fill(A2Eg.begin(), A2Eg.end(), COMPLEX(0));
+	fill(A1Mg.begin(), A1Mg.end(), COMPLEX(0));
+	fill(A2Mg.begin(), A2Mg.end(), COMPLEX(0));
+
+	fill(A1El.begin(), A1El.end(), COMPLEX(0));
+	fill(A2El.begin(), A2El.end(), COMPLEX(0));
+	fill(A1Ml.begin(), A1Ml.end(), COMPLEX(0));
+	fill(A2Ml.begin(), A2Ml.end(), COMPLEX(0));
 
 	MatrixXCPL A11(maxele,maxele);
 	MatrixXCPL A12(maxele,maxele);
