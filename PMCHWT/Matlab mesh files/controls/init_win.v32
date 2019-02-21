@@ -1,0 +1,65 @@
+% [CHH,CHW,fac,SEP,color,H_SIZE,V_SIZE]=init_win(H_SIZE,V_SIZE,title,color,type)
+%
+% With only input arguments:
+% 	Initialize figure for uicontrols
+% 	The default is character height 20 pixels for 1024x768 display, proportional for others
+% 	This default works well with 9 point Arial uicontrol font
+%
+% 	H_SIZE = Horizontal size of figure (characters)
+% 	V_SIZE = Vertical size of figure (lines)
+% 	title  = Window name (string) (optional). Default = 'Input parameters'
+% 	color  = Background color (optional). Default = [0.76,0.76,0.76].
+%	type   = 'window' or 'plot' (optional). Default 'window'.
+%
+% With only output arguments
+% 	Get figure information necessary for uicontrol functions
+%
+% 	CHH  = Character height (pixels)
+% 	CHW  = Character width (pixels)
+%	fac  = Reduction factor in character width due to narrow font
+% 	SEP  = Interline separation (pixels)
+% 	color = Background color of figure
+% 	H_SIZE = Horizontal size of figure (characters)
+% 	V_SIZE = Vertical size of figure (lines)
+%
+% version 3.2, Juan M. Rius, Sept 1996
+
+function [CHH,CHW,fac,SEP,color,H_SIZE,V_SIZE]=init_win(H_SIZE,V_SIZE,title,color,type)
+
+screen = get(0, 'ScreenSize');
+CHH = 24*(screen(3)/1024); CHW=CHH/2;	% Character size = 20 pixels height for 1024x768
+SEP = CHH*1.25;				% Interline separation (pixels)
+fac = 0.8;
+wpos=get(gcf,'Position');
+
+if nargin == 0,
+	H_SIZE=wpos(3)/CHW; V_SIZE=wpos(4)/SEP;
+	color = get(gcf,'Color');
+elseif nargout==0,
+
+	if nargin < 5, type = 'window';
+	end
+
+	if nargin < 4, color = [0.76,0.76,0.76];
+	end;
+
+	if nargin < 3, title = 'Input parameters:';
+	end
+
+	BORDE = 5;	% Thickness of MATLAB window border
+
+	wpos(1) = BORDE;	wpos(2) = screen(4)-BORDE;
+	wpos(3) = H_SIZE*CHW; 	wpos(4) = V_SIZE*SEP;
+
+	if strcmp(type,'window'),
+		set(gcf,'Position',wpos,'Resize','off','MenuBar','none',...
+			'NextPlot','new','Color',color,'Numbertitle','Off','Name',title);
+	elseif strcmp(type,'plot'),
+			set(gcf,'Position',wpos,'Color',color,'Numbertitle','Off','Name',title);
+	else error('type argument must be window or plot');
+	end
+
+	set(gca, 'DrawMode','fast','visible','off');
+
+else error('init_win must be called with either 0 input parameters or 0 output parameters');
+end

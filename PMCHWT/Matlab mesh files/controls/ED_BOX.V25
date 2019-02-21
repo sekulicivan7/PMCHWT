@@ -1,0 +1,143 @@
+% Create edit box in current window
+% 
+% ed_box(h_pos,v_pos,type,var,itx,text)
+%
+% h_pos	= Horizontal position of 1st character of variable name (characters)
+%	  For type = 0 or 1, 	optionally h_pos(2) = Size (characters) of text window
+%	  			optionally h_pos(3) = Size (characters) of edit window
+% v_pos	= Vertical position of 1st character of text (lines), from figure top
+% type	= control type
+%		0 = Numerical variable edit window
+%		1 = String variable edit window
+%		2 = Push button
+%		3 = Static text	
+%		4 = Check box
+%		5 = Frame (h_pos,v_pos,var,itx,text)->(x0,y0,width,height,[color])
+%			color = [R_bg G_bg B_bg R_fg G_fg B_fg]
+%			defaults: if lenght(color)<6, fg=[0 0 0]
+%				  if lenght(color)<3, bg=[1 1 1]
+%		6 = Radio button. h_pos, v_pos, itx, text must be arrays
+% var	= variable name (string) for edit windows, or callback (string) for push buttons
+% itx	= initial contents of the edit field (string or number), or text color [R G B],
+%	  or [initial_value, [list of values for each radio button]]
+% text	= text
+%
+% version 2.5, Juan M. Rius, April 1995
+
+function [ed,var]=ed_box(h_pos,v_pos,type,var,itx,text)
+
+CHH=get(gca,'FontSize')*20/12; CHW=CHH/2; SEP=CHH*1.1;	% Interline separation (pixels)
+wpos=get(gcf,'Position'); H_SIZE=wpos(3)/CHW; V_SIZE=wpos(4)/SEP;
+
+v_pos = V_SIZE-v_pos;	% Vertical position from bottom instead of top        
+ED_N=10;	% Size (characters) of number edit window (default)
+SED_N=16;	% Size (characters) of string edit window (default)
+STX_N=20;	% Size (characters) of text window (default)
+NTX_N=20;	% Size (characters) of text window (default)
+
+if type==5,
+	if length(text)== 3, bgcolor = text(1:3); else bgcolor = [1 1 1]; end
+	if length(text)== 6, fgcolor = text(4:6); else fgcolor = [0 0 0]; end
+	fr_pos = [h_pos(1)*CHW v_pos*SEP var*CHW itx*SEP];
+	fr = uicontrol(gcf,'Style','frame','Position',fr_pos,...
+	'BackGroundColor',bgcolor,'ForeGroundColor',fgcolor);
+	return;
+end
+
+if type==2, 
+	pu_pos = [h_pos(1)*CHW v_pos*SEP (2+length(text))*CHW SEP];
+	pu = uicontrol(gcf,'Style','push','Position',pu_pos,'String',text,...
+	'Callback',var);
+	return
+end
+
+if type==3
+	tit_pos = [h_pos(1)*CHW v_pos*SEP (1+length(text))*CHW CHH];
+	tx = uicontrol(gcf,'Style','Text','String',text,'Position',tit_pos,...
+	'BackGroundColor',[1 1 1],'ForeGroundColor',itx,...
+	'HorizontalAlignment','Left');
+	return
+end
+
+if type==4
+	cb_pos = [h_pos(1)*CHW v_pos*SEP (length(text)+1)*CHW SEP];
+	ed = uicontrol(gcf,'Style','checkbox','Position',cb_pos,'String',text,...
+	'BackGroundColor',[1 1 1],'ForeGroundColor',[0 0 0],...
+	'Value',itx);
+
+	call_st = [ var '=' 'get(get(gcf,''CurrentObject''),''Value'')==1;'];
+	set(ed,'Callback',call_st);
+	return
+end
+
+if type==6
+	num_op = length(h_pos);
+	mat = zeros([1 num_op]);
+
+	for i=1:num_op
+		tx = deblank(text(i,:));
+		cb_pos = [h_pos(i)*CHW v_pos(i)*SEP (length(tx)+1)*CHW SEP];
+		ed = uicontrol(gcf,'Style','radiobutton','Position',cb_pos,...
+		'String',tx,'BackGroundColor',[1 1 1],'ForeGroundColor',[0 0 0],...
+		'Max',itx(i+1),'Min',-1);
+		mat(i) = ed;		% Save all control numbers
+	end
+
+	for i=1:num_op
+		set(mat(i),'UserData',mat);	% Save mat in all controls
+		if itx(1) == itx(i+1), set(mat(i),'Value',get(mat(i),'Max'));
+		else set(mat(i),'Value',get(mat(i),'Min'));
+		end
+
+		call_st = [	'eemat = get(get(gcf,''CurrentObject''),''UserData''); '...
+				'for ee0 = 1:length(eemat), '...
+				'if get(gcf,''CurrentObject'') == eemat(ee0), '...
+				'set(eemat(ee0),''Value'',get(eemat(ee0),''Max'')); '...
+				'else '...
+				'set(eemat(ee0),''Value'',get(eemat(ee0),''Min'')); '...
+				'end; '...	% if
+				'end; '...	% for
+				var '=' 'get(get(gcf,''CurrentObject''),''Value''); '...
+			   ];
+		set(mat(i),'CallBack',call_st);
+	end
+return
+end
+
+if type==0,
+	if length(h_pos) > 1, ntx_n = h_pos(2); else ntx_n = NTX_N; end
+	if length(h_pos) > 2, ed_n = h_pos(3); else ed_n = ED_N; end
+	ed_pos = [(h_pos(1)+ntx_n+1)*CHW SEP*v_pos ed_n*CHW CHH];
+	tx_pos = [h_pos(1)*CHW SEP*v_pos ntx_n*CHW CHH];
+end
+if type==1,
+	if length(h_pos) > 1, stx_n = h_pos(2); else stx_n = STX_N; end
+	if length(h_pos) > 2, sed_n = h_pos(3); else sed_n = SED_N; end
+	ed_pos = [(h_pos(1)+stx_n+1)*CHW SEP*v_pos sed_n*CHW CHH];
+	tx_pos = [h_pos(1)*CHW SEP*v_pos stx_n*CHW CHH];
+end
+
+
+
+tx = uicontrol(gcf,'Style','Text',...
+'String',text,...
+'Position',tx_pos,...
+'BackGroundColor',[1 1 1],...
+'HorizontalAlignment','Right');
+
+ed = uicontrol(gcf,'Style','Edit',...
+'String',itx,...
+'Position',ed_pos,...
+'HorizontalAlignment','Right',...
+'BackGroundColor',[0 0 1],...
+'ForeGroundColor',[1 1 1]);
+
+if type==1,
+	call_st = [ var '=' 'get(get(gcf,''CurrentObject''),''String'');'];
+end
+
+if type==0,
+	call_st = [ var '=' 'str2num(get(get(gcf,''CurrentObject''),''String''));'];
+end
+
+set(ed,'Callback',call_st);
