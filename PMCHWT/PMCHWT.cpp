@@ -47,6 +47,7 @@ void receive_data(vector<COMPLEX> &A11, vector<COMPLEX> &A12, vector<COMPLEX> &A
 
 		MPI_Recv(&temp[0], SIZE, MPI_DOUBLE_COMPLEX, rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
+
 		for (int j1 = 0; j1 < n; ++j1) {
 
 
@@ -127,7 +128,6 @@ int main(int args, char *argv[]) {
 	trian.resize(sizes[2]);
 
 
-
 	MPI_Bcast(&coord[0], coord.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&topol[0], topol.size(), MPI_INT, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&trian[0], trian.size(), MPI_INT, 0, MPI_COMM_WORLD);
@@ -175,7 +175,6 @@ int main(int args, char *argv[]) {
 	COMPLEX eta2 = eta0*sqrt(mur2 / epsr2);
 
 	int SIZE = maxele*maxele;
-
 
 
 	vector<COMPLEX> A1El(SIZE);
@@ -234,7 +233,7 @@ int main(int args, char *argv[]) {
 
        auto begin = std::chrono::high_resolution_clock::now();
 
-		receive_data(A1Eg,A2Eg,A1Mg,A2Mg,maxele, numprocs);
+		receive_data(A1Eg, A2Eg, A1Mg, A2Mg, SIZE, numprocs);
 
 	   auto end = std::chrono::high_resolution_clock::now();
 

@@ -449,12 +449,12 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 
 		gran1 = 0;
 
-		gran2 = Nt / 2;
+		gran2 = int(Nt / 2);
 
 	}
 	else {
 
-		gran1 = Nt / 2 + 1;
+		gran1 =int(Nt / 2) + 1;
 
 		gran2 = Nt;
 	}
