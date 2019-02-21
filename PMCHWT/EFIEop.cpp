@@ -424,7 +424,7 @@ void singularityEFIE(double &det1, double &AR1, double &AR2, double* p1, double*
 
 
 
-void assemble_system_matrixEFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo> &Triangles, Points &points, unsigned int Nt, unsigned int maxele, COMPLEX k, COMPLEX eta)
+void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Trianinfo> &Triangles, Points &points, unsigned int Nt, unsigned int maxele, COMPLEX k, COMPLEX eta, int rank)
 
 
 {
@@ -443,9 +443,25 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 	double* RWGf = new double[3];
 	double* RWGs = new double[3];
 
+	int gran1, gran2;
+
+	if (rank % 2) {
+
+		gran1 = 0;
+
+		gran2 = Nt / 2;
+
+	}
+	else {
+
+		gran1 = Nt / 2 + 1;
+
+		gran2 = Nt;
+	}
+
 	//#pragma omp parallel for
 
-	for (int ele1 = 0; ele1 < Nt; ++ele1)
+	for (int ele1 = gran1; ele1 < gran2; ++ele1)
 	{
 		int* n1 = mesh.getNOvertex(ele1);
 		//vector<double>  p1(3);
@@ -643,7 +659,7 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 					const int j2 = int(tmp2 * s2 - 1);
 
 					//	#pragma omp critical
-					A[j1*maxele + j2] += double(1 / (4 * PI))*double(s1 * s2) * alok1E[i1 * 3 + i2];
+					Alocal[j1*maxele + j2] += double(1 / (4 * PI))*double(s1 * s2) * alok1E[i1 * 3 + i2];
 				}
 			}
 		}

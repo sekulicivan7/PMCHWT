@@ -32,8 +32,6 @@ using namespace Eigen;
 typedef Matrix<COMPLEX, Dynamic, Dynamic> MatrixXCPL;
 
 
-
-
 void send_data(vector<COMPLEX> &local_data, int SIZE, int numprocs, int my_rank) {
 
 	MPI_Send(&local_data[0], SIZE, MPI_DOUBLE_COMPLEX, 0, 1, MPI_COMM_WORLD);
@@ -77,10 +75,8 @@ void receive_data(vector<COMPLEX> &A11, vector<COMPLEX> &A12, vector<COMPLEX> &A
 
 
 
-
-
-
 int main(int args, char *argv[]) {
+
 	int my_rank, numprocs;
 
 	//program ce lokalno raditi na 9 procesa, 1 master i 8 slavea, svaka matrica ce se racunati sa dva procesa
@@ -180,58 +176,61 @@ int main(int args, char *argv[]) {
 
 	int SIZE = maxele*maxele;
 
-	vector<COMPLEX> A1Eg(SIZE);
-	vector<COMPLEX> A2Eg(SIZE); //globalne matrice
-	vector<COMPLEX> A1Mg(SIZE);
-	vector<COMPLEX> A2Mg(SIZE);
+
 
 	vector<COMPLEX> A1El(SIZE);
 	vector<COMPLEX> A2El(SIZE); //lokalne matrice
 	vector<COMPLEX> A1Ml(SIZE);
 	vector<COMPLEX> A2Ml(SIZE);
 
-	fill(A1Eg.begin(), A1Eg.end(), COMPLEX(0));
-	fill(A2Eg.begin(), A2Eg.end(), COMPLEX(0));
-	fill(A1Mg.begin(), A1Mg.end(), COMPLEX(0));
-	fill(A2Mg.begin(), A2Mg.end(), COMPLEX(0));
 
 	fill(A1El.begin(), A1El.end(), COMPLEX(0));
 	fill(A2El.begin(), A2El.end(), COMPLEX(0));
 	fill(A1Ml.begin(), A1Ml.end(), COMPLEX(0));
 	fill(A2Ml.begin(), A2Ml.end(), COMPLEX(0));
 
-	MatrixXCPL A11(maxele,maxele);
-	MatrixXCPL A12(maxele,maxele);
-	MatrixXCPL A21(maxele,maxele);
-	MatrixXCPL A22(maxele,maxele);
-
-	MatrixXCPL A(2*maxele, 2*maxele);
-
+	
 	Points points;
 
-	
 
     if((my_rank==1)|| (my_rank == 2)){
-	assemble_system_matrixEFIE(A1El, mesh, Triangles, points, Nt, maxele, k0, eta0);
+	assemble_system_matrixEFIE(A1El, mesh, Triangles, points, Nt, maxele, k0, eta0, my_rank);
 	    send_data(A1El, SIZE, numprocs, my_rank);
     }
-	if ((my_rank == 3) || (my_rank == 4)){
-		assemble_system_matrixEFIE(A2El, mesh, Triangles, points, Nt, maxele, k2, eta2); 
+	else if ((my_rank == 3) || (my_rank == 4)){
+		assemble_system_matrixEFIE(A2El, mesh, Triangles, points, Nt, maxele, k2, eta2, my_rank); 
 		send_data(A2El, SIZE, numprocs, my_rank);
 	}
 
-	if ((my_rank == 5) || (my_rank == 6)){
-		assemble_system_matrixMFIE(A1Ml, mesh, Triangles, points, Nt, maxele, k0); 
+	else if ((my_rank == 5) || (my_rank == 6)){
+		assemble_system_matrixMFIE(A1Ml, mesh, Triangles, points, Nt, maxele, k0, my_rank); 
 		send_data(A1Ml, SIZE, numprocs, my_rank);
 	}
 
-	if ((my_rank == 7) || (my_rank == 8)){
-	assemble_system_matrixMFIE(A2Ml, mesh, Triangles, points, Nt, maxele, k2);
+	else if ((my_rank == 7) || (my_rank == 8)){
+	assemble_system_matrixMFIE(A2Ml, mesh, Triangles, points, Nt, maxele, k2, my_rank);
        send_data(A2Ml, SIZE, numprocs, my_rank);
 }
 		
 
 	if (my_rank == 0) {
+
+		vector<COMPLEX> A1Eg(SIZE);
+		vector<COMPLEX> A2Eg(SIZE); //globalne matrice
+		vector<COMPLEX> A1Mg(SIZE);
+		vector<COMPLEX> A2Mg(SIZE);
+
+		fill(A1Eg.begin(), A1Eg.end(), COMPLEX(0));
+		fill(A2Eg.begin(), A2Eg.end(), COMPLEX(0));
+		fill(A1Mg.begin(), A1Mg.end(), COMPLEX(0));
+		fill(A2Mg.begin(), A2Mg.end(), COMPLEX(0));
+
+		MatrixXCPL A11(maxele, maxele);
+		MatrixXCPL A12(maxele, maxele);
+		MatrixXCPL A21(maxele, maxele);
+		MatrixXCPL A22(maxele, maxele);
+
+		MatrixXCPL A(2 * maxele, 2 * maxele);
 
        auto begin = std::chrono::high_resolution_clock::now();
 
@@ -261,8 +260,6 @@ std::cout << 1.0*std::chrono::duration_cast<std::chrono::nanoseconds>(end - begi
 
 }
 
-
-	
 
 	MPI_Finalize();
 
