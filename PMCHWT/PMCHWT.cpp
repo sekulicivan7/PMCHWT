@@ -15,6 +15,7 @@
 #include "MFIEop.h"
 #include "EFIEop.h"
 #include <Eigen/Dense>
+#include "mpi.h"
 
 #define COMPLEX complex<double>
 
@@ -30,13 +31,17 @@ using namespace Eigen;
 
 typedef Matrix<COMPLEX, Dynamic, Dynamic> MatrixXCPL;
 
-int main()
-{
+int main(int args, char *argv[]) {
+	int my_rank, numprocs;
 
-	ifstream file1("coord.txt");
-	ifstream file2("topol.txt");
-	ifstream file3("trian.txt");
 
+
+	// MPI initialization
+	MPI_Init(&args, &argv);
+	MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
+
+	vector<int>sizes(3);
 	vector<double> coord;
 	vector<int> topol;
 	vector<int> trian;
@@ -44,18 +49,44 @@ int main()
 	double num1 = 0;
 	int num2 = 0;
 	int num3 = 0;
+	if (my_rank == 0) {
 
-	while (file1 >> num1) {
-		coord.emplace_back(num1);
+		ifstream file1("coord.txt");
+		ifstream file2("topol.txt");
+		ifstream file3("trian.txt");
+
+		while (file1 >> num1) {
+			coord.emplace_back(num1);
+		}
+
+		while (file2 >> num2) {
+			topol.emplace_back(num2);
+		}
+
+		while (file3 >> num3) {
+			trian.emplace_back(num3);
+		}
+
+		int sizeC = coord.size();
+		int sizeTO = topol.size();
+		int sizeTR = trian.size();
+
+		sizes = { sizeC,sizeTO,sizeTR };
+
 	}
 
-	while (file2 >> num2) {
-		topol.emplace_back(num2);
-	}
+	MPI_Bcast(&sizes[0], sizes.size(), MPI_INT, 0, MPI_COMM_WORLD);
 
-	while (file3 >> num3) {
-		trian.emplace_back(num3);
-	}
+	coord.resize(sizes[0]);
+	topol.resize(sizes[1]);
+	trian.resize(sizes[2]);
+
+
+
+	MPI_Bcast(&coord[0], coord.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&topol[0], topol.size(), MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&trian[0], trian.size(), MPI_INT, 0, MPI_COMM_WORLD);
+
 
 	for (int i = 0; i < topol.size(); ++i) {
 		topol[i] = topol[i] - 1;
@@ -65,7 +96,9 @@ int main()
 	Mesh mesh(coord, topol, trian);
 
 	unsigned int Nt = (topol.size()) / 3;  //number of triangles
+
 	vector<Trianinfo> Triangles;
+
 	int maxele = 1;
 
 	for (int i = 0; i < trian.size(); ++i) {
@@ -96,11 +129,12 @@ int main()
 	COMPLEX k2 = k0*sqrt(epsr2*mur2);
 	COMPLEX eta2 = eta0*sqrt(mur2 / epsr2);
 
+	int SIZE = maxele*maxele;
 
-	vector<COMPLEX> A1E(maxele*maxele);
-	vector<COMPLEX> A2E(maxele*maxele);
-	vector<COMPLEX> A1M(maxele*maxele);
-	vector<COMPLEX> A2M(maxele*maxele);
+	vector<COMPLEX> A1E(SIZE);
+	vector<COMPLEX> A2E(SIZE);
+	vector<COMPLEX> A1M(SIZE);
+	vector<COMPLEX> A2M(SIZE);
 
 	fill(A1E.begin(), A1E.end(), COMPLEX(0));
 	fill(A2E.begin(), A2E.end(), COMPLEX(0));
@@ -116,6 +150,7 @@ int main()
 
 	Points points;
 	cout << "Calculating .." << endl;
+
 	auto begin = std::chrono::high_resolution_clock::now();
 
 	assemble_system_matrixEFIE(A1E, mesh, Triangles, points, Nt, maxele, k0, eta0);
@@ -145,6 +180,7 @@ int main()
 
 	std::cout << 1.0*std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / 1e9 << "s" << std::endl;
 
+	MPI_Finalize();
 
     return 0;
 }
