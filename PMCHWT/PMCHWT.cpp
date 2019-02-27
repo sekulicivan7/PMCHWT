@@ -80,7 +80,8 @@ int main(int args, char *argv[]) {
 
 	int my_rank, numprocs;
 
-	//program ce lokalno raditi na 9 procesa, 1 master i 8 slavea, svaka matrica ce se racunati sa dva procesa
+	//program ce lokalno raditi na 9 procesa, 1 master i 8 slavea, svaka matrica ce se racunati sa dva procesa - tako je napisan i mora biti 
+	// taj broj procesa
 
 	// MPI initialization
 	MPI_Init(&args, &argv);
