@@ -10,8 +10,6 @@
 #include "Trianinfo.h"
 #include "Products.h"
 #include <complex>
-#include <ppl.h>
-#include <omp.h>
 #include "MFIEop.h"
 #include "EFIEop.h"
 #include <Eigen/Dense>
@@ -116,7 +114,7 @@ int main()
 
 	Points points;
 	cout << "Calculating .." << endl;
-	auto begin = std::chrono::high_resolution_clock::now();
+	
 
 	assemble_system_matrixEFIE(A1E, mesh, Triangles, points, Nt, maxele, k0, eta0);
 	assemble_system_matrixEFIE(A2E, mesh, Triangles, points, Nt, maxele, k2, eta2);
@@ -124,7 +122,6 @@ int main()
 	assemble_system_matrixMFIE(A1M, mesh, Triangles, points, Nt, maxele, k0);
 	assemble_system_matrixMFIE(A2M, mesh, Triangles, points, Nt, maxele, k2);
 
-	auto end = std::chrono::high_resolution_clock::now();
 
 	for (int i = 0; i < maxele; ++i) {
 		for (int j = 0; j < maxele; ++j) {
@@ -143,7 +140,6 @@ int main()
 
 	cout << A(2, 0) << endl;
 
-	std::cout << 1.0*std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / 1e9 << "s" << std::endl;
 
 
     return 0;
