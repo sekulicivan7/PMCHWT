@@ -194,21 +194,21 @@ int main(int args, char *argv[]) {
 
 
     if((my_rank==1)|| (my_rank == 2)){
-	assemble_system_matrixEFIE(A1El, mesh, Triangles, points, Nt, maxele, k0, eta0, my_rank);
+	EFIE::assemble_system_matrixEFIE(A1El, mesh, Triangles, points, Nt, maxele, k0, eta0, my_rank);
 	    send_data(A1El, SIZE, numprocs, my_rank);
     }
 	else if ((my_rank == 3) || (my_rank == 4)){
-		assemble_system_matrixEFIE(A2El, mesh, Triangles, points, Nt, maxele, k2, eta2, my_rank); 
+		EFIE::assemble_system_matrixEFIE(A2El, mesh, Triangles, points, Nt, maxele, k2, eta2, my_rank); 
 		send_data(A2El, SIZE, numprocs, my_rank);
 	}
 
 	else if ((my_rank == 5) || (my_rank == 6)){
-		assemble_system_matrixMFIE(A1Ml, mesh, Triangles, points, Nt, maxele, k0, my_rank); 
+		MFIE::assemble_system_matrixMFIE(A1Ml, mesh, Triangles, points, Nt, maxele, k0, my_rank); 
 		send_data(A1Ml, SIZE, numprocs, my_rank);
 	}
 
 	else if ((my_rank == 7) || (my_rank == 8)){
-	assemble_system_matrixMFIE(A2Ml, mesh, Triangles, points, Nt, maxele, k2, my_rank);
+	MFIE::assemble_system_matrixMFIE(A2Ml, mesh, Triangles, points, Nt, maxele, k2, my_rank);
        send_data(A2Ml, SIZE, numprocs, my_rank);
 }
 		

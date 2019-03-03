@@ -21,6 +21,8 @@
 
 using namespace std;
 
+namespace MFIE{
+
 double* rho = new double[3];
 double* rho0N = new double[3];
 double* rho1 = new double[3];
@@ -758,5 +760,5 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 	}
 }
 
-
+}//end of namespace
 

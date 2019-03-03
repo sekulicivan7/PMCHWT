@@ -21,6 +21,7 @@
 
 using namespace std;
 
+namespace EFIE{
 
  double* rhoE = new double[3];
 double* rho0NE= new double[3];
@@ -667,4 +668,6 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 
 
 }
+
+}//end of namespace
 
