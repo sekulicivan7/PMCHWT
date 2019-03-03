@@ -193,10 +193,10 @@ int main(int args, char *argv[]) {
 	Points points;
 
 
-    if((my_rank==1)|| (my_rank == 2)){
-	EFIE::assemble_system_matrixEFIE(A1El, mesh, Triangles, points, Nt, maxele, k0, eta0, my_rank);
-	    send_data(A1El, SIZE, numprocs, my_rank);
-    }
+	if((my_rank==1)|| (my_rank == 2)){
+		EFIE::assemble_system_matrixEFIE(A1El, mesh, Triangles, points, Nt, maxele, k0, eta0, my_rank);
+		send_data(A1El, SIZE, numprocs, my_rank);
+	}
 	else if ((my_rank == 3) || (my_rank == 4)){
 		EFIE::assemble_system_matrixEFIE(A2El, mesh, Triangles, points, Nt, maxele, k2, eta2, my_rank); 
 		send_data(A2El, SIZE, numprocs, my_rank);
@@ -208,9 +208,9 @@ int main(int args, char *argv[]) {
 	}
 
 	else if ((my_rank == 7) || (my_rank == 8)){
-	MFIE::assemble_system_matrixMFIE(A2Ml, mesh, Triangles, points, Nt, maxele, k2, my_rank);
-       send_data(A2Ml, SIZE, numprocs, my_rank);
-}
+		MFIE::assemble_system_matrixMFIE(A2Ml, mesh, Triangles, points, Nt, maxele, k2, my_rank);
+		send_data(A2Ml, SIZE, numprocs, my_rank);
+	}
 		
 
 	if (my_rank == 0) {
@@ -235,25 +235,25 @@ int main(int args, char *argv[]) {
 		receive_data(A1Eg, A2Eg, A1Mg, A2Mg, SIZE, numprocs);
 
 
-	for (int i = 0; i < maxele; ++i) {
-		for (int j = 0; j < maxele; ++j) {
+		for (int i = 0; i < maxele; ++i) {
+			for (int j = 0; j < maxele; ++j) {
 
-			A11(i,j) = A1Eg[i*maxele + j] + A2Eg[i*maxele + j];
-			A12(i,j) = -A1Mg[i*maxele + j] - A2Mg[i*maxele + j];
-			A21(i,j) = A1Mg[i*maxele + j] + A2Mg[i*maxele + j];
-			A22(i,j) = (COMPLEX(1)/ pow(eta0,2))*A1Eg[i*maxele + j] + (COMPLEX(1) / pow(eta2, 2))*A2Eg[i*maxele + j];
+				A11(i,j) = A1Eg[i*maxele + j] + A2Eg[i*maxele + j];
+				A12(i,j) = -A1Mg[i*maxele + j] - A2Mg[i*maxele + j];
+				A21(i,j) = A1Mg[i*maxele + j] + A2Mg[i*maxele + j];
+				A22(i,j) = (COMPLEX(1)/ pow(eta0,2))*A1Eg[i*maxele + j] + (COMPLEX(1) / pow(eta2, 2))*A2Eg[i*maxele + j];
+			}
 		}
+
+		A.block(0, 0, maxele, maxele) = A11;
+		A.block(0, maxele, maxele, maxele) = eta0*A12;
+		A.block(maxele, 0, maxele, maxele) = eta0*A21;
+		A.block(maxele, maxele, maxele, maxele) =pow(eta0,2)*A22;
+
+		cout << A(2, 0) << endl;
+
+
 	}
-
-	A.block(0, 0, maxele, maxele) = A11;
-	A.block(0, maxele, maxele, maxele) = eta0*A12;
-	A.block(maxele, 0, maxele, maxele) = eta0*A21;
-	A.block(maxele, maxele, maxele, maxele) =pow(eta0,2)*A22;
- 
-cout << A(2, 0) << endl;
-
-
-}
 
 
 	MPI_Finalize();
