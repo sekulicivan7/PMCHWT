@@ -10,7 +10,7 @@
 
 using namespace std;
 
-inline void cross(double *res, double* u,
+ inline void cross(double *res, double* u,
 	 double* v)
 {
 
@@ -20,7 +20,7 @@ inline void cross(double *res, double* u,
 	
 }
 
-inline void cross(COMPLEX *res, double* u,
+ inline void cross(COMPLEX *res, double* u,
 	COMPLEX* v)
 {
 

@@ -1,3 +1,5 @@
+
+#include "stdafx.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -7,8 +9,6 @@
 #include "Trianinfo.h"
 #include "Products.h"
 #include <complex>
-#include <ppl.h>
-#include <omp.h>
 #include "EFIEop.h"
 
 #define COMPLEX complex<double>

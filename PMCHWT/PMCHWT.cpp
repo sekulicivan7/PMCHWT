@@ -1,6 +1,7 @@
 // PMCHWT.cpp : Defines the entry point for the console application.
 //
-
+#include "stdafx.h"
+#include "mpi.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -10,12 +11,11 @@
 #include "Trianinfo.h"
 #include "Products.h"
 #include <complex>
-#include <ppl.h>
-#include <omp.h>
+
 #include "MFIEop.h"
 #include "EFIEop.h"
 #include <Eigen/Dense>
-#include "mpi.h"
+
 
 #define COMPLEX complex<double>
 
@@ -232,11 +232,8 @@ int main(int args, char *argv[]) {
 
 		MatrixXCPL A(2 * maxele, 2 * maxele);
 
-       auto begin = std::chrono::high_resolution_clock::now();
-
 		receive_data(A1Eg, A2Eg, A1Mg, A2Mg, SIZE, numprocs);
 
-	   auto end = std::chrono::high_resolution_clock::now();
 
 	for (int i = 0; i < maxele; ++i) {
 		for (int j = 0; j < maxele; ++j) {
@@ -252,11 +249,9 @@ int main(int args, char *argv[]) {
 	A.block(0, maxele, maxele, maxele) = eta0*A12;
 	A.block(maxele, 0, maxele, maxele) = eta0*A21;
 	A.block(maxele, maxele, maxele, maxele) =pow(eta0,2)*A22;
-
-
+ 
 cout << A(2, 0) << endl;
 
-std::cout << 1.0*std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / 1e9 << "s" << std::endl;
 
 }
 

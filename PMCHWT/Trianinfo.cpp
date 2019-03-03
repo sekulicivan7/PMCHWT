@@ -1,4 +1,4 @@
-
+#include "stdafx.h"
 #include <iostream>
 #include "Trianinfo.h"
 #include "Products.h"
