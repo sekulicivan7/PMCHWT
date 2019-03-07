@@ -643,7 +643,7 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 
 			
 
-			else {
+			else if (!is_sameT) {
 
 				/// computation of near singular submatrix*******************************************
 				for (int nf = 0; nf != 12; ++nf) {
@@ -674,7 +674,12 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 
 						subtract(Rvec, &fielpoin[0], &sourcepoin[0]);
 
-						COMPLEX GradGreenNS = (exp(-I*k*R) / (pow(R, 3)))*(COMPLEX(1) + I*k*R) - COMPLEX(1) / (pow(R, 3)) - ((pow(k, 2)) / COMPLEX(2))*(1 / R);
+					COMPLEX GradGreenNS;
+					
+					if(R<eps)
+				GradGreenNS=COMPLEX(0);
+					else
+				GradGreenNS = (exp(-I*k*R) / (pow(R, 3)))*(COMPLEX(1) + I*k*R) - COMPLEX(1) / (pow(R, 3)) - ((pow(k, 2)) / COMPLEX(2))*(1 / R);
 
 						for (unsigned int i = 0; i != 3; ++i) {
 
