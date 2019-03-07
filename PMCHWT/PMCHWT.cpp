@@ -250,8 +250,16 @@ int main(int args, char *argv[]) {
 		A.block(maxele, 0, maxele, maxele) = eta0*A21;
 		A.block(maxele, maxele, maxele, maxele) =pow(eta0,2)*A22;
 
-		cout << A(2, 0) << endl;
+		COMPLEX zbroj=0;
 
+		for (int i = 0; i < 2*maxele; ++i) {
+			for (int j = 0; j < 2*maxele; ++j) {
+
+		zbroj = zbroj +A (i,j);
+		}
+	}
+
+	cout<<zbroj<<endl;
 
 	}
 
