@@ -13,6 +13,7 @@
 #include "MFIEop.h"
 #include "EFIEop.h"
 #include "excvecH.h"
+#include "excvecE.h"
 #include <Eigen/Dense>
 
 #define COMPLEX complex<double>
@@ -130,7 +131,7 @@ int main()
 	MFIE::assemble_system_matrixMFIE(A2M, mesh, Triangles, points, Nt, maxele, k2);
 	
 	MFIE::excMFIE::assemble_exic_vector(H, mesh, Triangles, points, Nt, k0, eta0);
-
+	EFIE::excEFIE::assemble_exic_vector(E, mesh, Triangles, points, Nt, k0);
 
 	for (int i = 0; i < maxele; ++i) {
 		for (int j = 0; j < maxele; ++j) {
