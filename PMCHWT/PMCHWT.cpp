@@ -12,6 +12,7 @@
 #include <complex>
 #include "MFIEop.h"
 #include "EFIEop.h"
+#include "excvecH.h"
 #include <Eigen/Dense>
 
 #define COMPLEX complex<double>
@@ -94,16 +95,22 @@ int main()
 	COMPLEX k2 = k0*sqrt(epsr2*mur2);
 	COMPLEX eta2 = eta0*sqrt(mur2 / epsr2);
 
-
+    
 	vector<COMPLEX> A1E(maxele*maxele);
 	vector<COMPLEX> A2E(maxele*maxele);
 	vector<COMPLEX> A1M(maxele*maxele);
-	vector<COMPLEX> A2M(maxele*maxele);
+	vector<COMPLEX> A2M(maxele*maxele); 
+	
+	vector<COMPLEX> H(maxele);
+	vector<COMPLEX> E(maxele);
 
 	fill(A1E.begin(), A1E.end(), COMPLEX(0));
 	fill(A2E.begin(), A2E.end(), COMPLEX(0));
 	fill(A1M.begin(), A1M.end(), COMPLEX(0));
 	fill(A2M.begin(), A2M.end(), COMPLEX(0));
+	
+	fill(H.begin(), H.end(), COMPLEX(0));
+	fill(E.begin(), E.end(), COMPLEX(0));
 
 	MatrixXCPL A11(maxele,maxele);
 	MatrixXCPL A12(maxele,maxele);
@@ -116,11 +123,13 @@ int main()
 	cout << "Calculating .." << endl;
 	
 
-	assemble_system_matrixEFIE(A1E, mesh, Triangles, points, Nt, maxele, k0, eta0);
-	assemble_system_matrixEFIE(A2E, mesh, Triangles, points, Nt, maxele, k2, eta2);
+	EFIE::assemble_system_matrixEFIE(A1E, mesh, Triangles, points, Nt, maxele, k0, eta0);
+	EFIE::assemble_system_matrixEFIE(A2E, mesh, Triangles, points, Nt, maxele, k2, eta2);
 
-	assemble_system_matrixMFIE(A1M, mesh, Triangles, points, Nt, maxele, k0);
-	assemble_system_matrixMFIE(A2M, mesh, Triangles, points, Nt, maxele, k2);
+	MFIE::assemble_system_matrixMFIE(A1M, mesh, Triangles, points, Nt, maxele, k0);
+	MFIE::assemble_system_matrixMFIE(A2M, mesh, Triangles, points, Nt, maxele, k2);
+	
+	MFIE::excMFIE::assemble_exic_vector(H, mesh, Triangles, points, Nt, k0, eta0);
 
 
 	for (int i = 0; i < maxele; ++i) {
@@ -144,7 +153,9 @@ int main()
 		for (int j = 0; j < 2*maxele; ++j) {
 
 		zbroj =zbroj+A(i,j);
+		
 	}
+	
    }
 
 

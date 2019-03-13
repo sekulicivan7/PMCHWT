@@ -20,6 +20,8 @@
 
 using namespace std;
 
+namespace MFIE{
+
 double* rho = new double[3];
 double* rho0N = new double[3];
 double* rho1 = new double[3];
@@ -533,11 +535,11 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 	for (int ele1 = 0; ele1 < Nt; ++ele1)
 	{
 		int* n1 = mesh.getNOvertex(ele1);
-		//vector<double>  p1(3);
+		
 		double*p1 = mesh.getCoord(*n1);
-		//vector<double>  p2(3);
+		
 		double* p2 = mesh.getCoord(*(n1 + 1));
-		// vector<double>  p3(3);
+		
 		double* p3 = mesh.getCoord(*(n1 + 2));
 
 		vector<int> rwg1 = mesh.getRWG(ele1);
@@ -554,18 +556,17 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 
 		for (int ele2 = 0; ele2 != Nt; ++ele2) {
 
-			//vector<double> RWGf;
-			//vector<double> RWGs;
+		
 
 			fill(alok1.begin(), alok1.end(), COMPLEX(0));
 			fill(alok2.begin(), alok2.end(), COMPLEX(0));
 
 			int* n2 = mesh.getNOvertex(ele2);
-			// vector<double>  q1(3);
+			
 			double* q1 = mesh.getCoord(*n2);
-			// vector<double>  q2(3);
+			
 			double* q2 = mesh.getCoord(*(n2 + 1));
-			// vector<double>  q3(3);
+			
 			double* q3 = mesh.getCoord(*(n2 + 2));
 
 			vector<int> rwg2 = mesh.getRWG(ele2);
@@ -743,6 +744,8 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 		}
 	}
 }
+
+}//end of namespace
 
 
 
