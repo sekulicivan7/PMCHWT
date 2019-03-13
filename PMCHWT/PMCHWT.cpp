@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+//#include <iomanip>
 #include "Mesh.h"
 #include "Points.h"
 #include "math.h"
@@ -29,6 +30,7 @@ using namespace std;
 using namespace Eigen;
 
 typedef Matrix<COMPLEX, Dynamic, Dynamic> MatrixXCPL;
+typedef Matrix<COMPLEX,Dynamic, 1>VectorXCPL;
 
 int main()
 {
@@ -119,6 +121,8 @@ int main()
 	MatrixXCPL A22(maxele,maxele);
 
 	MatrixXCPL A(2*maxele, 2*maxele);
+	VectorXCPL C(2*maxele);
+	VectorXCPL B(2*maxele);
 
 	Points points;
 	cout << "Calculating .." << endl;
@@ -130,10 +134,15 @@ int main()
 	MFIE::assemble_system_matrixMFIE(A1M, mesh, Triangles, points, Nt, maxele, k0);
 	MFIE::assemble_system_matrixMFIE(A2M, mesh, Triangles, points, Nt, maxele, k2);
 	
-	MFIE::excMFIE::assemble_exic_vector(H, mesh, Triangles, points, Nt, k0, eta0);
 	EFIE::excEFIE::assemble_exic_vector(E, mesh, Triangles, points, Nt, k0);
+	MFIE::excMFIE::assemble_exic_vector(H, mesh, Triangles, points, Nt, k0, eta0);
+	
 
 	for (int i = 0; i < maxele; ++i) {
+	 
+	 C(i)=E[i];
+	 C(i+maxele)=eta0*H[i];
+	
 		for (int j = 0; j < maxele; ++j) {
 
 			A11(i,j) = A1E[i*maxele + j] + A2E[i*maxele + j];
@@ -147,6 +156,38 @@ int main()
 	A.block(0, maxele, maxele, maxele) = eta0*A12;
 	A.block(maxele, 0, maxele, maxele) = eta0*A21;
 	A.block(maxele, maxele, maxele, maxele) =pow(eta0,2)*A22;
+	
+	B = A.colPivHouseholderQr().solve(C);
+	
+	B.tail(maxele)=eta0*B.tail(maxele);
+	
+	ofstream out1("solution.txt");
+	ofstream out2("parameters.txt");
+	
+   if (out1.is_open())
+ 
+  {
+    
+    for (int i = 0; i < 2*maxele; ++i){ 
+    out1 << real(B(i));
+    out1 <<',';
+    out1 << imag(B(i));
+    out1 << endl;
+    }
+    
+    out1.close();
+    
+  }
+  
+   if (out2.is_open())
+   {
+   
+   out2 << maxele;
+   
+   out2.close();
+   
+   }
+  
 
 	COMPLEX zbroj = 0;
 
