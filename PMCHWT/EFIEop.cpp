@@ -1,5 +1,4 @@
 
-#include "stdafx.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -23,66 +22,59 @@ using namespace std;
 
 namespace EFIE{
 
-double* rhoE = new double[3];
-double* rho0NE= new double[3];
-double* rho1E = new double[3];
-double* rho2E = new double[3];
-double* rho3E = new double[3];
-double* l1E = new double[3];
-double* l2E = new double[3];
-double* l3E = new double[3];
-double* RWGfE = new double[3];
-double* IkonE = new double[3];
-double* POME = new double[3];
-double CONST1E;
-double CONST2E;
-double IscaE;
-double LOGplE;
-double LOGmnE;
-double ATANplE;
-double ATANmnE;
-double KE;
-double* KKE = new double[3];
-double* npom1E = new double[3];
-double* npom2E = new double[3];
-double* npom3E = new double[3];
-double* POM1E = new double[3];
-double* POM2E = new double[3];
+ double* rho = new double[3];
+double* rho0N= new double[3];
+double* rho1 = new double[3];
+double* rho2 = new double[3];
+double* rho3 = new double[3];
+double* l1 = new double[3];
+double* l2 = new double[3];
+double* l3 = new double[3];
+double* RWGf = new double[3];
+double* RWGs = new double[3];
+double* Ikon = new double[3];
+double* POM = new double[3];
 
-vector<double> fielpoinE(3);
-vector<double> sourcepoinE(3);
-double* u1E= new double[3];
-double* u2E = new double[3];
-double* u3E = new double[3];
-vector<double*> PnulvecE(3);
-vector<double*> UE(3);
+double* KK = new double[3];
+double* npom1 = new double[3];
+double* npom2 = new double[3];
+double* npom3 = new double[3];
+double* POM1 = new double[3];
+double* POM2 = new double[3];
 
-vector<double> LplE(3);
-vector<double> LmnE(3);
-vector<double> PnulE(3);
-vector<double> PplE(3);
-vector<double> PmnE(3);
-vector<double> DE(3);
-vector<double> RnulE(3);
-vector<double> RplE(3);
-vector<double> RmnE(3);
+vector<double> fielpoin(3);
+vector<double> sourcepoin(3);
+double* u1= new double[3];
+double* u2 = new double[3];
+double* u3 = new double[3];
+vector<double*> Pnulvec(3);
+vector<double*> U(3);
 
-double* rhotmpE = new double[3];
-vector<COMPLEX> alok1E(9), alok2E(9);
+vector<double> Lpl(3);
+vector<double> Lmn(3);
+vector<double> Pnul(3);
+vector<double> Ppl(3);
+vector<double> Pmn(3);
+vector<double> D(3);
+vector<double> Rnul(3);
+vector<double> Rpl(3);
+vector<double> Rmn(3);
 
-double* vecpomE = new double[3];
-double *p1nulvecE = new double[3];
-double *p2nulvecE = new double[3];
-double *p3nulvecE = new double[3];
-double* pomVECE = new double[3];
-double* pomocvFE = new double[3];
-double* pomNvecE = new double[3];
-double* pomVec1E = new double[3];
-double* pomVec2E = new double[3];
+double* rhotmp = new double[3];
+vector<COMPLEX> alok1(9), alok2(9);
 
-double *IvecE = new double[3];
+double* vecpom = new double[3];
+double *p1nulvec = new double[3];
+double *p2nulvec = new double[3];
+double *p3nulvec = new double[3];
+double* pomVEC = new double[3];
+double* pomocvF = new double[3];
+double* pomocvS = new double[3];
+double* pomNvec = new double[3];
+double* pomVec1 = new double[3];
+double* pomVec2 = new double[3];
 
-
+double *Ivec = new double[3];
 
 
 bool is_regular(const Trianinfo &trianF, const Trianinfo &trianS)
@@ -100,50 +92,67 @@ void singularityEFIE(double &det1, double &AR1, double &AR2, double* p1, double*
 	double* q1, double* q2, double* q3, vector<double> &nvec2,
 	vector<vector<double>> &PointsS, vector<double> &WeightsS, int* n1, int* n2,
 	Mesh &mesh, COMPLEX k, COMPLEX eta, vector<COMPLEX> &alok2) {
+	
+//inicijalizacija varijabli	
+double CONST1;
+double CONST2;
+double Isca;
+double LOGpl;
+double LOGmn;
+double ATANpl;
+double ATANmn;
+double K;
 
 
-	KE = dot(&nvec2[0], &q1[0]);
+	K = dot(&nvec2[0], &q1[0]);
 
-	multconst(npom1E, &nvec2[0], KE);
+	multconst(npom1, &nvec2[0], K);
 
-	subtract(rho1E, &q1[0], npom1E);
+	subtract(rho1, &q1[0], npom1);
 
-	KE = dot(&nvec2[0], &q2[0]);
-	multconst(npom2E, &nvec2[0], KE);
-	subtract(rho2E, &q2[0], npom2E);
+	K = dot(&nvec2[0], &q2[0]);
+	
+	multconst(npom2, &nvec2[0], K);
+	
+	subtract(rho2, &q2[0], npom2);
 
-	KE = dot(&nvec2[0], &q3[0]);
+	K = dot(&nvec2[0], &q3[0]);
 
-	multconst(npom3E, &nvec2[0], KE);
+	multconst(npom3, &nvec2[0], K);
 
-	subtract(rho3E, &q3[0], npom3E);
+	subtract(rho3, &q3[0], npom3);
 
-	subtract(KKE, rho2E, rho1E);
-	double norm1 = norm(KKE);
+	subtract(KK, rho2, rho1);
+	
+	double norm1 = norm(KK);
 
-	subtract(rhotmpE, rho2E, rho1E);
+	subtract(rhotmp, rho2, rho1);
 
-	dividecon(l1E, rhotmpE, norm1);
+	dividecon(l1, rhotmp, norm1);
 
-	subtract(rhotmpE, rho3E, rho2E);
-	norm1 = norm(rhotmpE);
+	subtract(rhotmp, rho3, rho2);
+	
+	norm1 = norm(rhotmp);
 
-	subtract(rhotmpE, rho3E, rho2E);
-	dividecon(l2E, rhotmpE, norm1);
+	subtract(rhotmp, rho3, rho2);
+	
+	dividecon(l2, rhotmp, norm1);
 
-	subtract(rhotmpE, rho1E, rho3E);
-	norm1 = norm(rhotmpE);
-	dividecon(l3E, rhotmpE, norm1);
+	subtract(rhotmp, rho1, rho3);
+	
+	norm1 = norm(rhotmp);
+	
+	dividecon(l3, rhotmp, norm1);
 
 
 
-	cross(u1E, l1E, &nvec2[0]);
-	cross(u2E, l2E, &nvec2[0]);
-	cross(u3E, l3E, &nvec2[0]);
+	cross(u1, l1, &nvec2[0]);
+	cross(u2, l2, &nvec2[0]);
+	cross(u3, l3, &nvec2[0]);
 
-	UE[0] = u1E;
-	UE[1] = u2E;
-	UE[2] = u3E;
+	U[0] = u1;
+	U[1] = u2;
+	U[2] = u3;
 
 
 	for (int nf = 0; nf != 12; ++nf) {
@@ -154,146 +163,146 @@ void singularityEFIE(double &det1, double &AR1, double &AR2, double* p1, double*
 
 		double N0 = 1.0 - N1 - N2;
 
-		fielpoinE[0] = *p1*N1 + *p2*N2 + *p3*N0;
-		fielpoinE[1] = *(p1 + 1)*N1 + *(p2 + 1)*N2 + *(p3 + 1)*N0;
-		fielpoinE[2] = *(p1 + 2)*N1 + *(p2 + 2)*N2 + *(p3 + 2)*N0;
+		fielpoin[0] = *p1*N1 + *p2*N2 + *p3*N0;
+		fielpoin[1] = *(p1 + 1)*N1 + *(p2 + 1)*N2 + *(p3 + 1)*N0;
+		fielpoin[2] = *(p1 + 2)*N1 + *(p2 + 2)*N2 + *(p3 + 2)*N0;
 
-		KE = dot(&nvec2[0], &fielpoinE[0]);
+		K = dot(&nvec2[0], &fielpoin[0]);
 
-		multconst(vecpomE, &nvec2[0], KE);
+		multconst(vecpom, &nvec2[0], K);
 
-		subtract(rhoE, &fielpoinE[0], vecpomE);
+		subtract(rho, &fielpoin[0], vecpom);
 
-		subtract(rhotmpE, rho2E, rhoE);
-		double l1pl = dot(rhotmpE, l1E);
-		subtract(rhotmpE, rho1E, rhoE);
-		double l1mn = dot(rhotmpE, l1E);
+		subtract(rhotmp, rho2, rho);
+		double l1pl = dot(rhotmp, l1);
+		subtract(rhotmp, rho1, rho);
+		double l1mn = dot(rhotmp, l1);
 
-		subtract(rhotmpE, rho3E, rhoE);
-		double l2pl = dot(rhotmpE, l2E);
-		subtract(rhotmpE, rho2E, rhoE);
-		double l2mn = dot(rhotmpE, l2E);
+		subtract(rhotmp, rho3, rho);
+		double l2pl = dot(rhotmp, l2);
+		subtract(rhotmp, rho2, rho);
+		double l2mn = dot(rhotmp, l2);
 
-		subtract(rhotmpE, rho1E, rhoE);
-		double l3pl = dot(rhotmpE, l3E);
-		subtract(rhotmpE, rho3E, rhoE);
-		double l3mn = dot(rhotmpE, l3E);
+		subtract(rhotmp, rho1, rho);
+		double l3pl = dot(rhotmp, l3);
+		subtract(rhotmp, rho3, rho);
+		double l3mn = dot(rhotmp, l3);
 
-		LplE[0] = l1pl;
-		LplE[1] = l2pl;
-		LplE[2] = l3pl;
+		Lpl[0] = l1pl;
+		Lpl[1] = l2pl;
+		Lpl[2] = l3pl;
 
 
-		LmnE[0] = l1mn;
-		LmnE[1] = l2mn;
-		LmnE[2] = l3mn;
+		Lmn[0] = l1mn;
+		Lmn[1] = l2mn;
+		Lmn[2] = l3mn;
 
-		subtract(rhotmpE, rho2E, rhoE);
-		double p1nul = abs(dot(rhotmpE, u1E));
-		subtract(rhotmpE, rho3E, rhoE);
-		double p2nul = abs(dot(rhotmpE, u2E));
-		subtract(rhotmpE, rho1E, rhoE);
-		double p3nul = abs(dot(rhotmpE, u3E));
+		subtract(rhotmp, rho2, rho);
+		double p1nul = abs(dot(rhotmp, u1));
+		subtract(rhotmp, rho3, rho);
+		double p2nul = abs(dot(rhotmp, u2));
+		subtract(rhotmp, rho1, rho);
+		double p3nul = abs(dot(rhotmp, u3));
 
-		PnulE[0] = p1nul;
-		PnulE[1] = p2nul;
-		PnulE[2] = p3nul;
+		Pnul[0] = p1nul;
+		Pnul[1] = p2nul;
+		Pnul[2] = p3nul;
 
-		subtract(rhotmpE, rho2E, rhoE);
-		double p1pl = norm(rhotmpE);
-		subtract(rhotmpE, rho1E, rhoE);
-		double p1mn = norm(rhotmpE);
+		subtract(rhotmp, rho2, rho);
+		double p1pl = norm(rhotmp);
+		subtract(rhotmp, rho1, rho);
+		double p1mn = norm(rhotmp);
 
-		subtract(rhotmpE, rho3E, rhoE);
-		double p2pl = norm(rhotmpE);
-		subtract(rhotmpE, rho2E, rhoE);
-		double p2mn = norm(rhotmpE);
+		subtract(rhotmp, rho3, rho);
+		double p2pl = norm(rhotmp);
+		subtract(rhotmp, rho2, rho);
+		double p2mn = norm(rhotmp);
 
-		subtract(rhotmpE, rho1E, rhoE);
-		double p3pl = norm(rhotmpE);
-		subtract(rhotmpE, rho3E, rhoE);
-		double p3mn = norm(rhotmpE);
+		subtract(rhotmp, rho1, rho);
+		double p3pl = norm(rhotmp);
+		subtract(rhotmp, rho3, rho);
+		double p3mn = norm(rhotmp);
 
-		PplE[0] = p1pl;
-		PplE[1] = p2pl;
-		PplE[2] = p3pl;
-		PmnE[0] = p1mn;
-		PmnE[1] = p2mn;
-		PmnE[2] = p3mn;
+		Ppl[0] = p1pl;
+		Ppl[1] = p2pl;
+		Ppl[2] = p3pl;
+		Pmn[0] = p1mn;
+		Pmn[1] = p2mn;
+		Pmn[2] = p3mn;
 
 		if (p1nul < 50 * eps) {
 
-			p1nulvecE[0] = 0.0;
-			p1nulvecE[1] = 0.0;
-			p1nulvecE[2] = 0.0;
+			p1nulvec[0] = 0.0;
+			p1nulvec[1] = 0.0;
+			p1nulvec[2] = 0.0;
 		}
 
 		else
 		{
-			subtract(POM1E, rho2E, rhoE);
-			multconst(POM2E, l1E, l1pl);
-			subtract(POME, POM1E, POM2E);
+			subtract(POM1, rho2, rho);
+			multconst(POM2, l1, l1pl);
+			subtract(POM, POM1, POM2);
 
-			dividecon(p1nulvecE, POME, p1nul);
+			dividecon(p1nulvec, POM, p1nul);
 
 		}
 
 		if (p2nul < 50 * eps) {
 
-			p2nulvecE[0] = 0.0;
-			p2nulvecE[1] = 0.0;
-			p2nulvecE[2] = 0.0;
+			p2nulvec[0] = 0.0;
+			p2nulvec[1] = 0.0;
+			p2nulvec[2] = 0.0;
 		}
 
 		else
 		{
-			subtract(POM1E, rho3E, rhoE);
-			multconst(POM2E, l2E, l2pl);
-			subtract(POME, POM1E, POM2E);
+			subtract(POM1, rho3, rho);
+			multconst(POM2, l2, l2pl);
+			subtract(POM, POM1, POM2);
 
-			dividecon(p2nulvecE, POME, p2nul);
+			dividecon(p2nulvec, POM, p2nul);
 
 		}
 
 		if (p3nul < 50 * eps)
 		{
-			p3nulvecE[0] = 0.0;
-			p3nulvecE[1] = 0.0;
-			p3nulvecE[2] = 0.0;
+			p3nulvec[0] = 0.0;
+			p3nulvec[1] = 0.0;
+			p3nulvec[2] = 0.0;
 		}
 		else
 		{
-			subtract(POM1E, rho1E, rhoE);
-			multconst(POM2E, l3E, l3pl);
-			subtract(POME, POM1E, POM2E);
-			dividecon(p3nulvecE, POME, p3nul);
+			subtract(POM1, rho1, rho);
+			multconst(POM2, l3, l3pl);
+			subtract(POM, POM1, POM2);
+			dividecon(p3nulvec, POM, p3nul);
 
 		}
 
 
-		PnulvecE[0] = p1nulvecE;
-		PnulvecE[1] = p2nulvecE;
-		PnulvecE[2] = p3nulvecE;
+		Pnulvec[0] = p1nulvec;
+		Pnulvec[1] = p2nulvec;
+		Pnulvec[2] = p3nulvec;
 
 
-		subtract(rhotmpE, &fielpoinE[0], q1);
-		double d1 = dot(&nvec2[0], rhotmpE);
-		subtract(rhotmpE, &fielpoinE[0], q2);
-		double d2 = dot(&nvec2[0], rhotmpE);
-		subtract(rhotmpE, &fielpoinE[0], q3);
-		double d3 = dot(&nvec2[0], rhotmpE);
+		subtract(rhotmp, &fielpoin[0], q1);
+		double d1 = dot(&nvec2[0], rhotmp);
+		subtract(rhotmp, &fielpoin[0], q2);
+		double d2 = dot(&nvec2[0], rhotmp);
+		subtract(rhotmp, &fielpoin[0], q3);
+		double d3 = dot(&nvec2[0], rhotmp);
 
-		DE[0] = d1;
-		DE[1] = d2;
-		DE[2] = d3;
+		D[0] = d1;
+		D[1] = d2;
+		D[2] = d3;
 
 		double R1nul = sqrt(pow(p1nul, 2) + pow(d1, 2));
 		double R2nul = sqrt(pow(p2nul, 2) + pow(d2, 2));
 		double R3nul = sqrt(pow(p3nul, 2) + pow(d3, 2));
 
-		RnulE[0] = R1nul;
-		RnulE[1] = R2nul;
-		RnulE[2] = R3nul;
+		Rnul[0] = R1nul;
+		Rnul[1] = R2nul;
+		Rnul[2] = R3nul;
 
 		double R1pl = sqrt(pow(p1pl, 2) + pow(d1, 2));
 		double R1mn = sqrt(pow(p1mn, 2) + pow(d1, 2));
@@ -304,44 +313,44 @@ void singularityEFIE(double &det1, double &AR1, double &AR2, double* p1, double*
 		double R3pl = sqrt(pow(p3pl, 2) + pow(d3, 2));
 		double R3mn = sqrt(pow(p3mn, 2) + pow(d3, 2));
 
-		RplE[0] = R1pl;
-		RplE[1] = R2pl;
-		RplE[2] = R3pl;
+		Rpl[0] = R1pl;
+		Rpl[1] = R2pl;
+		Rpl[2] = R3pl;
 
-		RmnE[0] = R1mn;
-		RmnE[1] = R2mn;
-		RmnE[2] = R3mn;
+		Rmn[0] = R1mn;
+		Rmn[1] = R2mn;
+		Rmn[2] = R3mn;
 
 
 
-		IvecE[0] = 0.0;
-		IvecE[1] = 0.0;
-		IvecE[2] = 0.0;
+		Ivec[0] = 0.0;
+		Ivec[1] = 0.0;
+		Ivec[2] = 0.0;
 
-		IscaE = 0.0; // scalar part of singular integral
+		Isca = 0.0; // scalar part of singular integral
 
 					///// CALCULATION OF INTEGRALSS
 					// vec part
 		for (unsigned int iv = 0; iv != 3; ++iv) {
 
-			if ((RplE[iv] + LplE[iv]) < 50 * eps)
-				LOGplE = 0.0;
+			if ((Rpl[iv] + Lpl[iv]) < 50 * eps)
+				LOGpl = 0.0;
 			else
-				LOGplE = log(RplE[iv] + LplE[iv]);
+				LOGpl = log(Rpl[iv] + Lpl[iv]);
 
 
-			if ((RmnE[iv] + LmnE[iv]) < 50 * eps)
-				LOGmnE = 0.0;
+			if ((Rmn[iv] + Lmn[iv]) < 50 * eps)
+				LOGmn = 0.0;
 			else
-				LOGmnE = log(RmnE[iv] + LmnE[iv]);
+				LOGmn = log(Rmn[iv] + Lmn[iv]);
 
 
-			CONST1E = 0.5*(pow(RnulE[iv], 2)*(LOGplE - LOGmnE) + RplE[iv] * LplE[iv] - RmnE[iv] * LmnE[iv]);
+			CONST1 = 0.5*(pow(Rnul[iv], 2)*(LOGpl - LOGmn) + Rpl[iv] * Lpl[iv] - Rmn[iv] * Lmn[iv]);
 
 
-			multconst(pomVECE, UE[iv], CONST1E);
+			multconst(pomVEC, U[iv], CONST1);
 
-			add(IvecE, IvecE, pomVECE);
+			add(Ivec, Ivec, pomVEC);
 
 
 		}
@@ -351,28 +360,28 @@ void singularityEFIE(double &det1, double &AR1, double &AR2, double* p1, double*
 		// scalar part
 		for (unsigned int is = 0; is != 3; ++is) {
 
-			if ((RplE[is] + LplE[is]) < 50 * eps)
-				LOGplE = 0.0;
+			if ((Rpl[is] + Lpl[is]) < 50 * eps)
+				LOGpl = 0.0;
 			else
-				LOGplE = log(RplE[is] + LplE[is]);
+				LOGpl = log(Rpl[is] + Lpl[is]);
 
-			if ((RmnE[is] + LmnE[is]) < 50 * eps)
-				LOGmnE = 0.0;
+			if ((Rmn[is] + Lmn[is]) < 50 * eps)
+				LOGmn = 0.0;
 			else
-				LOGmnE = log(RmnE[is] + LmnE[is]);
+				LOGmn = log(Rmn[is] + Lmn[is]);
 
-			if ((pow(RnulE[is], 2) + abs(DE[is])*RplE[is]) < 50 * eps)
-				ATANplE = 0.0;
+			if ((pow(Rnul[is], 2) + abs(D[is])*Rpl[is]) < 50 * eps)
+				ATANpl = 0.0;
 			else
-				ATANplE = atan((PnulE[is] * LplE[is]) / (pow(RnulE[is], 2) + abs(DE[is])*RplE[is]));
+				ATANpl = atan((Pnul[is] * Lpl[is]) / (pow(Rnul[is], 2) + abs(D[is])*Rpl[is]));
 
-			if ((pow(RnulE[is], 2) + abs(DE[is])*RmnE[is]) < 50 * eps)
-				ATANmnE= 0.0;
+			if ((pow(Rnul[is], 2) + abs(D[is])*Rmn[is]) < 50 * eps)
+				ATANmn= 0.0;
 			else
-				ATANmnE = atan((PnulE[is] * LmnE[is]) / (pow(RnulE[is], 2) + abs(DE[is])*RmnE[is]));
+				ATANmn = atan((Pnul[is] * Lmn[is]) / (pow(Rnul[is], 2) + abs(D[is])*Rmn[is]));
 
 
-			IscaE = IscaE + dot(PnulvecE[is], UE[is])*(PnulE[is] * (LOGplE - LOGmnE) - abs(DE[is])*(ATANplE - ATANmnE));
+			Isca = Isca + dot(Pnulvec[is], U[is])*(Pnul[is] * (LOGpl - LOGmn) - abs(D[is])*(ATANpl - ATANmn));
 
 		}
 
@@ -381,45 +390,42 @@ void singularityEFIE(double &det1, double &AR1, double &AR2, double* p1, double*
 		for (unsigned int i = 0; i != 3; ++i) {
 
 
-			//vector<double> p(3);
 			double* p = mesh.getCoord(n1[i]);
 
-			subtract(pomocvFE, &fielpoinE[0], p);
+			subtract(pomocvF, &fielpoin[0], p);
+			
 			double konstF = (1 / (2 * AR1));
 
-			multconst(RWGfE, pomocvFE, konstF);
+			multconst(RWGf, pomocvF, konstF);
 
 
 
 			for (unsigned int j = 0; j != 3; ++j) {
 
-				//vector<double> q(3);
+				
 				double* q = mesh.getCoord(n2[j]);
 
 				double K1 = dot(&nvec2[0], q);
 
-				multconst(pomNvecE, &nvec2[0], K1);
+				multconst(pomNvec, &nvec2[0], K1);
 
-				subtract(rho0NE, q, pomNvecE);
+				subtract(rho0N, q, pomNvec);
 
 				double K2 = double(1 / (2 * AR2));
 
 
-				subtract(rhotmpE, rhoE, rho0NE);
-				multconst(pomVec1E, rhotmpE, IscaE);
+				subtract(rhotmp, rho, rho0N);
+				multconst(pomVec1, rhotmp, Isca);
 
-				add(pomVec2E, IvecE, pomVec1E);
+				add(pomVec2, Ivec, pomVec1);
 
-				multconst(IkonE, pomVec2E, K2);
+				multconst(Ikon, pomVec2, K2);
 
-				alok2[i * 3 + j] = alok2[i * 3 + j] + wf * det1*(I*k*eta*dot(RWGfE, IkonE) - ((I*eta) / k)*(double(1 / AR1))*(double(1 / AR2))*(IscaE));
+				alok2[i * 3 + j] = alok2[i * 3 + j] + wf * det1*(I*k*eta*dot(RWGf, Ikon) - ((I*eta) / k)*(double(1 / AR1))*(double(1 / AR2))*(Isca));
 			}
 		}
 	}
 }
-
-
-
 
 
 
@@ -438,11 +444,6 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 
 	vector<double> WeightsS = points.getWeightsS();
 
-	// Inicijalizacija pomocnih promenljivih
-	double* pomocvF = new double[3];
-	double* pomocvS = new double[3];
-	double* RWGf = new double[3];
-	double* RWGs = new double[3];
 
 	int gran1, gran2;
 
@@ -465,11 +466,11 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 	for (int ele1 = gran1; ele1 < gran2; ++ele1)
 	{
 		int* n1 = mesh.getNOvertex(ele1);
-		//vector<double>  p1(3);
+	
 		double*p1 = mesh.getCoord(*n1);
-		//vector<double>  p2(3);
+
 		double* p2 = mesh.getCoord(*(n1 + 1));
-		// vector<double>  p3(3);
+	
 		double* p3 = mesh.getCoord(*(n1 + 2));
 
 
@@ -483,31 +484,34 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 
 		for (int ele2 = 0; ele2 != Nt; ++ele2) {
 
-			//vector<double> RWGf;
-			//vector<double> RWGs;
 
-			fill(alok1E.begin(), alok1E.end(), COMPLEX(0));
-			fill(alok2E.begin(), alok2E.end(), COMPLEX(0));
+			fill(alok1.begin(), alok1.end(), COMPLEX(0));
+			
+			fill(alok2.begin(), alok2.end(), COMPLEX(0));
 
 			int* n2 = mesh.getNOvertex(ele2);
-			// vector<double>  q1(3);
+		
 			double* q1 = mesh.getCoord(*n2);
-			// vector<double>  q2(3);
+	
 			double* q2 = mesh.getCoord(*(n2 + 1));
-			// vector<double>  q3(3);
+		
 			double* q3 = mesh.getCoord(*(n2 + 2));
 
 			vector<int> rwg2 = mesh.getRWG(ele2);
+			
 			Trianinfo trianS = Triangles[ele2];
+			
 			double det2 = trianS.getDeter();
+			
 			double AR2 = det2 / 2.0;
+			
 			vector<double> nvecS = trianS.getnorm();
 
-
 			if (is_regular(trianF, trianS)) {
+		
 
 				/// computation of regular submatrix*******************************************
-				for (int nf = 0; nf != 4; ++nf) {
+				for (int nf = 0; nf != 7; ++nf) {
 
 					double N1 = PointsNS[nf][0];
 					double N2 = PointsNS[nf][1];
@@ -515,49 +519,50 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 
 					double wf = WeightsNS[nf];
 
-					fielpoinE[0] = *p1*N1 + *p2*N2 + *p3*N0;
-					fielpoinE[1] = *(p1 + 1)*N1 + *(p2 + 1)*N2 + *(p3 + 1)*N0;
-					fielpoinE[2] = *(p1 + 2)*N1 + *(p2 + 2)*N2 + *(p3 + 2)*N0;
+					fielpoin[0] = *p1*N1 + *p2*N2 + *p3*N0;
+					fielpoin[1] = *(p1 + 1)*N1 + *(p2 + 1)*N2 + *(p3 + 1)*N0;
+					fielpoin[2] = *(p1 + 2)*N1 + *(p2 + 2)*N2 + *(p3 + 2)*N0;
 
-					for (int ns = 0; ns != 4; ++ns) {
+					for (int ns = 0; ns != 7; ++ns) {
 
 						N1 = PointsNS[ns][0];
 						N2 = PointsNS[ns][1];
 						N0 = 1.0 - N1 - N2;
 						double ws = WeightsNS[ns];
 
-						sourcepoinE[0] = *q1*N1 + *q2*N2 + *q3*(N0);
-						sourcepoinE[1] = *(q1 + 1)*N1 + *(q2 + 1)*N2 + *(q3 + 1)*(N0);
-						sourcepoinE[2] = *(q1 + 2)*N1 + *(q2 + 2)*N2 + *(q3 + 2)*(N0);
+						sourcepoin[0] = *q1*N1 + *q2*N2 + *q3*(N0);
+						sourcepoin[1] = *(q1 + 1)*N1 + *(q2 + 1)*N2 + *(q3 + 1)*(N0);
+						sourcepoin[2] = *(q1 + 2)*N1 + *(q2 + 2)*N2 + *(q3 + 2)*(N0);
 
 
-						double R = norm(&fielpoinE[0], &sourcepoinE[0]);
+						double R = norm(&fielpoin[0], &sourcepoin[0]);
 
 						COMPLEX Green = exp(-I * k*R) / R;
 
 						for (unsigned int i = 0; i != 3; ++i) {
 
-							//vector<double> p(3);
+							
 							double* p = mesh.getCoord(n1[i]);
 
-							subtract(pomocvFE, &fielpoinE[0], p);
+							subtract(pomocvF, &fielpoin[0], p);
+							
 							double konstF = (1 / (2 * AR1));
 
 							multconst(RWGf, pomocvF, konstF);
 
 							for (unsigned int j = 0; j != 3; ++j) {
 
-								//vector<double> q(3);
+								
 								double* q = mesh.getCoord(n2[j]);
 
-								subtract(pomocvS, &sourcepoinE[0], q);
+								subtract(pomocvS, &sourcepoin[0], q);
 
 								double konstS = (1 / (2 * AR2));
 
 								multconst(RWGs, pomocvS, konstS);
 
 
-								alok1E[i * 3 + j] = alok1E[i * 3 + j] + wf * ws*det1*det2*(I*k*eta*Green*dot(RWGf, RWGs) - ((I*eta) / k)*Green*(double(1 / AR1))*(double(1 / AR2)));
+								alok1[i * 3 + j] = alok1[i * 3 + j] + wf * ws*det1*det2*(I*k*eta*Green*dot(RWGf, RWGs) - ((I*eta) / k)*Green*(double(1 / AR1))*(double(1 / AR2)));
 
 
 							}
@@ -578,9 +583,9 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 
 					double wf = WeightsS[nf];
 
-					fielpoinE[0] = *p1 * N1 + *p2 * N2 + *p3 * N0;
-					fielpoinE[1] = *(p1 + 1) * N1 + *(p2 + 1) * N2 + *(p3 + 1) * N0;
-					fielpoinE[2] = *(p1 + 2) * N1 + *(p2 + 2) * N2 + *(p3 + 2) * N0;
+					fielpoin[0] = *p1 * N1 + *p2 * N2 + *p3 * N0;
+					fielpoin[1] = *(p1 + 1) * N1 + *(p2 + 1) * N2 + *(p3 + 1) * N0;
+					fielpoin[2] = *(p1 + 2) * N1 + *(p2 + 2) * N2 + *(p3 + 2) * N0;
 
 
 					for (int ns = 0; ns != 12; ++ns) {
@@ -591,12 +596,12 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 
 						double ws = WeightsS[ns];
 
-						sourcepoinE[0] = *q1*N1 + *q2*N2 + *q3*(N0);
-						sourcepoinE[1] = *(q1 + 1)*N1 + *(q2 + 1)*N2 + *(q3 + 1)*(N0);
-						sourcepoinE[2] = *(q1 + 2)*N1 + *(q2 + 2)*N2 + *(q3 + 2)*(N0);
+						sourcepoin[0] = *q1*N1 + *q2*N2 + *q3*(N0);
+						sourcepoin[1] = *(q1 + 1)*N1 + *(q2 + 1)*N2 + *(q3 + 1)*(N0);
+						sourcepoin[2] = *(q1 + 2)*N1 + *(q2 + 2)*N2 + *(q3 + 2)*(N0);
 
-						double R = norm(&fielpoinE[0], &sourcepoinE[0]);
-						// const REAL invR = REAL(1) / R;
+						double R = norm(&fielpoin[0], &sourcepoin[0]);
+					
 
 						COMPLEX GreenNS;
 
@@ -607,10 +612,10 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 
 						for (unsigned int i = 0; i != 3; ++i) {
 
-							//vector<double> p(3);
+							
 							double* p = mesh.getCoord(n1[i]);
 
-							subtract(pomocvF, &fielpoinE[0], p);
+							subtract(pomocvF, &fielpoin[0], p);
 							double konstF = (1.0 / (2.0 * AR1));
 
 							multconst(RWGf, pomocvF, konstF);
@@ -618,16 +623,16 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 
 							for (unsigned int j = 0; j != 3; ++j) {
 
-								//vector<double> q(3);
+								
 								double* q = mesh.getCoord(n2[j]);
 
-								subtract(pomocvS, &sourcepoinE[0], q);
+								subtract(pomocvS, &sourcepoin[0], q);
 
 								double konstS = (1.0 / (2.0 * AR2));
 
 								multconst(RWGs, pomocvS, konstS);
 
-								alok1E[i * 3 + j] = alok1E[i * 3 + j] + wf * ws*det1*det2*((I*k*eta*GreenNS*dot(RWGf, RWGs) - ((I*eta) / k)*GreenNS*(double(1 / AR1))*(double(1 / AR2))));
+								alok1[i * 3 + j] = alok1[i * 3 + j] + wf * ws*det1*det2*((I*k*eta*GreenNS*dot(RWGf, RWGs) - ((I*eta) / k)*GreenNS*(double(1 / AR1))*(double(1 / AR2))));
 
 							}
 						}
@@ -636,16 +641,14 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 
 
 				//CALL singularity i zbrojiti te dvije matrice
-				//vector<COMPLEX> alok2(9);
-				//fill(alok2.begin(), alok2.end(), COMPLEX(0));
+			
 
-
-				singularityEFIE(det1, AR1, AR2, p1, p2, p3, q1, q2, q3, nvecS, PointsS, WeightsS, n1, n2, mesh, k, eta, alok2E);
+				singularityEFIE(det1, AR1, AR2, p1, p2, p3, q1, q2, q3, nvecS, PointsS, WeightsS, n1, n2, mesh, k, eta, alok2);
 
 				for (unsigned int i = 0; i != 3; ++i) {
 					for (unsigned int j = 0; j != 3; ++j) {
 
-						alok1E[i * 3 + j] = alok1E[i * 3 + j] + alok2E[i * 3 + j];
+						alok1[i * 3 + j] = alok1[i * 3 + j] + alok2[i * 3 + j];
 					}
 				}
 			}
@@ -660,7 +663,7 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 					const int j2 = int(tmp2 * s2 - 1);
 
 					//	#pragma omp critical
-					Alocal[j1*maxele + j2] += double(1 / (4 * PI))*double(s1 * s2) * alok1E[i1 * 3 + i2];
+					Alocal[j1*maxele + j2] += double(1 / (4 * PI))*double(s1 * s2) * alok1[i1 * 3 + i2];
 				}
 			}
 		}

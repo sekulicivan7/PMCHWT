@@ -171,7 +171,7 @@ int main(int args, char *argv[]) {
 
 	//DEFINICIJE PARAMETARA ZA DIELEKTRIK
 
-	COMPLEX epsr2 = -2.0-3.0*I;
+	COMPLEX epsr2 = -3.0-2.0*I;
 	COMPLEX mur2 = 1.0;
 
 	COMPLEX k2 = k0*sqrt(epsr2*mur2);
@@ -216,7 +216,8 @@ int main(int args, char *argv[]) {
 		
 
 	if (my_rank == 0) {
-
+	
+	
 		vector<COMPLEX> A1Eg(SIZE);
 		vector<COMPLEX> A2Eg(SIZE); //globalne matrice
 		vector<COMPLEX> A1Mg(SIZE);
@@ -244,6 +245,7 @@ int main(int args, char *argv[]) {
 
 		receive_data(A1Eg, A2Eg, A1Mg, A2Mg, SIZE, numprocs);
 		
+		
 		EFIE::excEFIE::assemble_exic_vector(E, mesh, Triangles, points, Nt, k0);
 	    MFIE::excMFIE::assemble_exic_vector(H, mesh, Triangles, points, Nt, k0, eta0);
 
@@ -266,6 +268,8 @@ int main(int args, char *argv[]) {
 		A.block(0, maxele, maxele, maxele) = eta0*A12;
 		A.block(maxele, 0, maxele, maxele) = eta0*A21;
 		A.block(maxele, maxele, maxele, maxele) =pow(eta0,2)*A22;
+		
+		cout<<"tu sam"<<endl;
 
 		B = A.colPivHouseholderQr().solve(C);
 	
