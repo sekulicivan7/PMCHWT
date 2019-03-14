@@ -58,6 +58,15 @@ int main()
 	while (file3 >> num3) {
 		trian.emplace_back(num3);
 	}
+	
+	file1.clear();
+	file1.seekg(0, ios::beg);
+	
+	file2.clear();
+	file2.seekg(0, ios::beg);  // go to the beginning of files
+
+	file3.clear();
+	file3.seekg(0, ios::beg);
 
 	for (int i = 0; i < topol.size(); ++i) {
 		topol[i] = topol[i] - 1;
