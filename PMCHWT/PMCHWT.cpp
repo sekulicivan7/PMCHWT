@@ -92,7 +92,7 @@ int main()
 
 	//DEFINICIJE PARAMETARA ZA DIELEKTRIK
 
-	COMPLEX epsr2 = -2.0-3.0*I;
+	COMPLEX epsr2 = -3.0 - 2.0*I;
 	COMPLEX mur2 = 1.0;
 
 	COMPLEX k2 = k0*sqrt(epsr2*mur2);
@@ -189,19 +189,11 @@ int main()
    }
   
 
-	COMPLEX zbroj = 0;
+	COMPLEX zbroj = B.sum();
 
-	for (int i = 0; i < 2*maxele; ++i) {
-		for (int j = 0; j < 2*maxele; ++j) {
-
-		zbroj =zbroj+A(i,j);
-		
-	}
 	
-   }
+    cout << zbroj<< endl ;
 
-
-cout << zbroj << endl ;
 
     return 0;
 }

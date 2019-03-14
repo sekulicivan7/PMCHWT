@@ -75,7 +75,7 @@ void assemble_exic_vector(vector<COMPLEX> &C, Mesh &mesh, vector<Trianinfo> &Tri
 		
 		fill(alok1exvec.begin(), alok1exvec.end(), COMPLEX(0));
 		
-		for (unsigned int nf = 0; nf != 4; ++nf) {
+		for (unsigned int nf = 0; nf != 7; ++nf) {
 
 					double N1 = PointsNS[nf][0];
 					double N2 = PointsNS[nf][1];

@@ -31,19 +31,10 @@ double* l1 = new double[3];
 double* l2 = new double[3];
 double* l3 = new double[3];
 double* RWGf = new double[3];
+double* RWGs = new double[3];
 COMPLEX* Ikon = new COMPLEX[3];// finish integral
 double* POM = new double[3];
-double CONST1;
-double CONST2;
-COMPLEX KONST1;
-COMPLEX KONST2;
-double LOGpl;
-double LOGmn;
-double ATANpl;
-double ATANmn;
-double Isca1R;
-double Isca1R3;
-double K;
+
 double* KK = new double[3];
 double* npom1 = new double[3];
 double* npom2 = new double[3];
@@ -78,6 +69,7 @@ double *p2nulvec = new double[3];
 double *p3nulvec = new double[3];
 double* pomVEC = new double[3];
 double* pomocvF = new double[3];
+double* pomocvS = new double[3];
 double* pomNvec = new double[3];
 double* pomVec1 = new double[3];
 COMPLEX* pomVec2 = new COMPLEX[3];
@@ -97,7 +89,7 @@ double* KROSS2 = new double[3];
 
 
 
-bool is_regularM(const Trianinfo &trianF, const Trianinfo &trianS)
+bool is_regular(const Trianinfo &trianF, const Trianinfo &trianS)
 {
 	vector<double> cp1 = trianF.getcp();
 	vector<double> cp2 = trianS.getcp();
@@ -120,7 +112,19 @@ void singularityMFIE(double &det1, double &AR1, double &AR2, double* p1, double*
 	double* q1, double* q2, double* q3, vector<double> &nvec2, vector<double> &nvec1,
 	vector<vector<double>> &PointsS, vector<double> &WeightsS, int* n1, int* n2,
 	Mesh &mesh, COMPLEX k, vector<COMPLEX> &alok2) {
-
+	
+	//inicijalizacija varijabli
+	double CONST1;
+	double CONST2;
+	COMPLEX KONST1;
+	COMPLEX KONST2;
+	double LOGpl;
+	double LOGmn;
+	double ATANpl;
+	double ATANmn;
+	double Isca1R;
+	double Isca1R3;
+	double K;
 
 	K = dot(&nvec2[0], &q1[0]);
 
@@ -445,11 +449,10 @@ void singularityMFIE(double &det1, double &AR1, double &AR2, double* p1, double*
 		// testing Galerkin
 		for (unsigned int i = 0; i != 3; ++i) {
 
-
-			//vector<double> p(3);
 			double* p = mesh.getCoord(n1[i]);
 
 			subtract(pomocvF, &fielpoin[0], p);
+			
 			double konstF = (1 / (2 * AR1));
 
 			multconst(RWGf, pomocvF, konstF);
@@ -458,7 +461,7 @@ void singularityMFIE(double &det1, double &AR1, double &AR2, double* p1, double*
 
 			for (unsigned int j = 0; j != 3; ++j) {
 
-				//vector<double> q(3);
+				
 				double* q = mesh.getCoord(n2[j]);
 
 				subtract(Rivec, &fielpoin[0], q);
@@ -470,6 +473,7 @@ void singularityMFIE(double &det1, double &AR1, double &AR2, double* p1, double*
 				subtract(rho0N, q, pomNvec);
 
 				KONST1 = ((pow(k, 2)) / COMPLEX(2));
+				
 				KONST2 = KONST1*Isca1R;
 
 				subtract(pomVec1, rho, rho0N);
@@ -521,14 +525,10 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 	vector<double> WeightsS = points.getWeightsS();
 
 	// Inicijalizacija pomocnih promenljivih
-	double* pomocvF = new double[3];
-	double* pomocvS = new double[3];
-	double* RWGf = new double[3];
-	double* RWGs = new double[3];
+
 	double* CROSS1 = new double[3];
 	double* CROSS2 = new double[3];
 	double* Rvec = new double[3];
-	double* Rivec = new double[3];
 
 	//#pragma omp parallel for
 
@@ -570,16 +570,21 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 			double* q3 = mesh.getCoord(*(n2 + 2));
 
 			vector<int> rwg2 = mesh.getRWG(ele2);
+			
 			Trianinfo trianS = Triangles[ele2];
+			
 			double det2 = trianS.getDeter();
+			
 			double AR2 = det2 / 2.0;
+			
 			vector<double> nvecS = trianS.getnorm();
+			
 
-
-			if (is_regularM(trianF, trianS)) {
+			if (is_regular(trianF, trianS)) {
+			
 
 				/// computation of regular submatrix*******************************************
-				for (int nf = 0; nf != 4; ++nf) {
+				for (int nf = 0; nf != 7; ++nf) {
 
 					double N1 = PointsNS[nf][0];
 					double N2 = PointsNS[nf][1];
@@ -591,7 +596,7 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 					fielpoin[1] = *(p1 + 1)*N1 + *(p2 + 1)*N2 + *(p3 + 1)*N0;
 					fielpoin[2] = *(p1 + 2)*N1 + *(p2 + 2)*N2 + *(p3 + 2)*N0;
 
-					for (int ns = 0; ns != 4; ++ns) {
+					for (int ns = 0; ns != 7; ++ns) {
 
 						N1 = PointsNS[ns][0];
 						N2 = PointsNS[ns][1];
@@ -612,7 +617,7 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 
 						for (unsigned int i = 0; i != 3; ++i) {
 
-							//vector<double> p(3);
+							
 							double* p = mesh.getCoord(n1[i]);
 
 							subtract(pomocvF, &fielpoin[0], p);
@@ -622,7 +627,7 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 
 							for (unsigned int j = 0; j != 3; ++j) {
 
-								//vector<double> q(3);
+								
 								double* q = mesh.getCoord(n2[j]);
 
 								subtract(pomocvS, &sourcepoin[0], q);
@@ -642,9 +647,11 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 				}
 			}
 
+			//
 			
-
-			else if (!is_sameT) {
+		
+			
+			else if (!is_sameT(trianF , trianS)) {
 
 				/// computation of near singular submatrix*******************************************
 				for (int nf = 0; nf != 12; ++nf) {
@@ -652,7 +659,6 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 					double N1 = PointsS[nf][0];
 					double N2 = PointsS[nf][1];
 					double N0 = 1.0 - N1 - N2;
-
 					double wf = WeightsS[nf];
 
 					fielpoin[0] = *p1*N1 + *p2*N2 + *p3*N0;
@@ -684,7 +690,7 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 
 						for (unsigned int i = 0; i != 3; ++i) {
 
-							//vector<double> p(3);
+							
 							double* p = mesh.getCoord(n1[i]);
 
 							subtract(pomocvF, &fielpoin[0], p);
@@ -694,7 +700,7 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 
 							for (unsigned int j = 0; j != 3; ++j) {
 
-								//vector<double> q(3);
+								
 								double* q = mesh.getCoord(n2[j]);
 
 								subtract(pomocvS, &sourcepoin[0], q);
