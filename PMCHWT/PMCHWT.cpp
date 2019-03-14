@@ -11,9 +11,10 @@
 #include "Trianinfo.h"
 #include "Products.h"
 #include <complex>
-
 #include "MFIEop.h"
 #include "EFIEop.h"
+#include "excvecH.h"
+#include "excvecE.h"
 #include <Eigen/Dense>
 
 
@@ -30,6 +31,7 @@ using namespace std;
 using namespace Eigen;
 
 typedef Matrix<COMPLEX, Dynamic, Dynamic> MatrixXCPL;
+typedef Matrix<COMPLEX,Dynamic, 1>VectorXCPL;
 
 
 void send_data(vector<COMPLEX> &local_data, int SIZE, int numprocs, int my_rank) {
@@ -219,11 +221,17 @@ int main(int args, char *argv[]) {
 		vector<COMPLEX> A2Eg(SIZE); //globalne matrice
 		vector<COMPLEX> A1Mg(SIZE);
 		vector<COMPLEX> A2Mg(SIZE);
+		
+			vector<COMPLEX> H(maxele);
+	        vector<COMPLEX> E(maxele);
 
 		fill(A1Eg.begin(), A1Eg.end(), COMPLEX(0));
 		fill(A2Eg.begin(), A2Eg.end(), COMPLEX(0));
 		fill(A1Mg.begin(), A1Mg.end(), COMPLEX(0));
 		fill(A2Mg.begin(), A2Mg.end(), COMPLEX(0));
+		
+			fill(H.begin(), H.end(), COMPLEX(0));
+			fill(E.begin(), E.end(), COMPLEX(0));
 
 		MatrixXCPL A11(maxele, maxele);
 		MatrixXCPL A12(maxele, maxele);
@@ -231,11 +239,20 @@ int main(int args, char *argv[]) {
 		MatrixXCPL A22(maxele, maxele);
 
 		MatrixXCPL A(2 * maxele, 2 * maxele);
+		VectorXCPL C(2*maxele);
+		VectorXCPL B(2*maxele);
 
 		receive_data(A1Eg, A2Eg, A1Mg, A2Mg, SIZE, numprocs);
+		
+		EFIE::excEFIE::assemble_exic_vector(E, mesh, Triangles, points, Nt, k0);
+	    MFIE::excMFIE::assemble_exic_vector(H, mesh, Triangles, points, Nt, k0, eta0);
 
 
 		for (int i = 0; i < maxele; ++i) {
+		
+		 C(i)=E[i];
+	     C(i+maxele)=eta0*H[i];
+	     
 			for (int j = 0; j < maxele; ++j) {
 
 				A11(i,j) = A1Eg[i*maxele + j] + A2Eg[i*maxele + j];
@@ -250,16 +267,42 @@ int main(int args, char *argv[]) {
 		A.block(maxele, 0, maxele, maxele) = eta0*A21;
 		A.block(maxele, maxele, maxele, maxele) =pow(eta0,2)*A22;
 
-		COMPLEX zbroj=0;
+		B = A.colPivHouseholderQr().solve(C);
+	
+	B.tail(maxele)=eta0*B.tail(maxele);
+	
+	ofstream out1("solution.txt");
+	ofstream out2("parameters.txt");
+	
+   if (out1.is_open())
+ 
+  {
+    
+    for (int i = 0; i < 2*maxele; ++i){ 
+    out1 << real(B(i));
+    out1 <<',';
+    out1 << imag(B(i));
+    out1 << endl;
+    }
+    
+    out1.close();
+    
+  }
+  
+   if (out2.is_open())
+   {
+   
+   out2 << maxele;
+   
+   out2.close();
+   
+   }
+  
 
-		for (int i = 0; i < 2*maxele; ++i) {
-			for (int j = 0; j < 2*maxele; ++j) {
+	COMPLEX zbroj = B.sum();
 
-		zbroj = zbroj +A (i,j);
-		}
-	}
-
-	cout<<zbroj<<endl;
+	
+    cout << zbroj<< endl ;
 
 	}
 
