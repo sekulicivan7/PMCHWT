@@ -116,6 +116,15 @@ int main(int args, char *argv[]) {
 			trian.emplace_back(num3);
 		}
 
+    file1.clear();
+	file1.seekg(0, ios::beg);
+	
+	file2.clear();
+	file2.seekg(0, ios::beg);  // go to the beginning of files
+
+	file3.clear();
+	file3.seekg(0, ios::beg);
+
 		int sizeC = coord.size();
 		int sizeTO = topol.size();
 		int sizeTR = trian.size();
