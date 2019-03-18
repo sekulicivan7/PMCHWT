@@ -31,12 +31,10 @@ void Trianinfo::calculate_parameters() {
 		p32[j] = coord3[j] - coord2[j];
 	}
 
-	double* nvector = new double[3];
-		
-    cross(nvector, &p13[0], &p21[0]);
-	nvec = { *nvector, *(nvector + 1), *(nvector + 2) };
-	deter = norm(nvector);
+	
+    cross(&nvec[0], &p13[0], &p21[0]);
 
+	deter = norm(&nvec[0]);
 
 	nvec[0] = nvec[0]/deter;
 	nvec[1] = nvec[1]/deter;

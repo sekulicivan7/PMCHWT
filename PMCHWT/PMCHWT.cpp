@@ -16,6 +16,7 @@
 #include "excvecE.h"
 #include <time.h>
 #include <Eigen/Dense>
+#include <omp.h>
 
 #define COMPLEX complex<double>
 
@@ -139,7 +140,7 @@ int main()
 	Points points;
 	cout << "Calculating .." << endl;
 	
-    start = clock();
+    start = omp_get_wtime();
     
 	EFIE::assemble_system_matrixEFIE(A1E, mesh, Triangles, points, Nt, maxele, k0, eta0);
 	EFIE::assemble_system_matrixEFIE(A2E, mesh, Triangles, points, Nt, maxele, k2, eta2);
@@ -150,9 +151,9 @@ int main()
 	EFIE::excEFIE::assemble_exic_vector(E, mesh, Triangles, points, Nt, k0);
 	MFIE::excMFIE::assemble_exic_vector(H, mesh, Triangles, points, Nt, k0, eta0);
 	
-	end = clock();
+	end = omp_get_wtime();
 	
-	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+	cpu_time_used = ((double) (end - start));
 	
 	cout << "System matrix assembling," << cpu_time_used << endl; 
 

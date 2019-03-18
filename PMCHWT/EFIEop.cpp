@@ -8,6 +8,7 @@
 #include "Products.h"
 #include <complex>
 #include "EFIEop.h"
+#include <omp.h>
 
 #define COMPLEX complex<double>
 
@@ -21,59 +22,6 @@ using namespace std;
 
 namespace EFIE{
 
- double* rho = new double[3];
-double* rho0N= new double[3];
-double* rho1 = new double[3];
-double* rho2 = new double[3];
-double* rho3 = new double[3];
-double* l1 = new double[3];
-double* l2 = new double[3];
-double* l3 = new double[3];
-double* RWGf = new double[3];
-double* RWGs = new double[3];
-double* Ikon = new double[3];
-double* POM = new double[3];
-
-double* KK = new double[3];
-double* npom1 = new double[3];
-double* npom2 = new double[3];
-double* npom3 = new double[3];
-double* POM1 = new double[3];
-double* POM2 = new double[3];
-
-vector<double> fielpoin(3);
-vector<double> sourcepoin(3);
-double* u1= new double[3];
-double* u2 = new double[3];
-double* u3 = new double[3];
-vector<double*> Pnulvec(3);
-vector<double*> U(3);
-
-vector<double> Lpl(3);
-vector<double> Lmn(3);
-vector<double> Pnul(3);
-vector<double> Ppl(3);
-vector<double> Pmn(3);
-vector<double> D(3);
-vector<double> Rnul(3);
-vector<double> Rpl(3);
-vector<double> Rmn(3);
-
-double* rhotmp = new double[3];
-vector<COMPLEX> alok1(9), alok2(9);
-
-double* vecpom = new double[3];
-double *p1nulvec = new double[3];
-double *p2nulvec = new double[3];
-double *p3nulvec = new double[3];
-double* pomVEC = new double[3];
-double* pomocvF = new double[3];
-double* pomocvS = new double[3];
-double* pomNvec = new double[3];
-double* pomVec1 = new double[3];
-double* pomVec2 = new double[3];
-
-double *Ivec = new double[3];
 
 
 bool is_regular(const Trianinfo &trianF, const Trianinfo &trianS)
@@ -93,6 +41,61 @@ void singularityEFIE(double &det1, double &AR1, double &AR2, double* p1, double*
 	Mesh &mesh, COMPLEX k, COMPLEX eta, vector<COMPLEX> &alok2) {
 	
 //inicijalizacija varijabli	
+
+double rho[3];
+double rho0N[3];
+double rho1[3];
+double rho2[3];
+double rho3[3];
+double l1[3];
+double l2[3];
+double l3[3];
+double RWGf[3];
+
+double Ikon[3];
+double POM[3];
+
+double KK[3];
+double npom1[3];
+double npom2[3];
+double npom3[3];
+double POM1[3];
+double POM2[3];
+
+vector<double> fielpoin(3);
+
+double u1[3];
+double u2[3];
+double u3[3];
+vector<double*> Pnulvec(3);
+vector<double*> U(3);
+
+vector<double> Lpl(3);
+vector<double> Lmn(3);
+vector<double> Pnul(3);
+vector<double> Ppl(3);
+vector<double> Pmn(3);
+vector<double> D(3);
+vector<double> Rnul(3);
+vector<double> Rpl(3);
+vector<double> Rmn(3);
+
+double rhotmp[3];
+
+double vecpom[3];
+double p1nulvec[3];
+double p2nulvec[3];
+double p3nulvec[3];
+double pomVEC[3];
+double pomocvF[3];
+double pomNvec[3];
+double pomVec1[3];
+double pomVec2[3];
+
+double Ivec[3];
+
+
+
 double CONST1;
 double CONST2;
 double Isca;
@@ -445,10 +448,20 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 	vector<double> WeightsS = points.getWeightsS();
 
 
-	//#pragma omp parallel for
-
+	#pragma omp parallel for
 	for (int ele1 = 0; ele1 < Nt; ++ele1)
 	{
+	
+	     //inicijalizacija lokalnih varijabli
+	     double pomocvS[3];
+	     double pomocvF[3];
+	     double RWGs[3];
+		 double RWGf[3];
+		vector<double> sourcepoin(3);
+		vector<double> fielpoin(3);
+		vector<COMPLEX> alok1(9);
+		vector<COMPLEX> alok2(9);
+	     
 		int* n1 = mesh.getNOvertex(ele1);
 	
 		double*p1 = mesh.getCoord(n1[0]);
@@ -463,8 +476,6 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 		Trianinfo trianF = Triangles[ele1];
 		double det1 = trianF.getDeter();
 		double AR1 = det1 / 2.0;
-
-
 
 		for (int ele2 = 0; ele2 != Nt; ++ele2) {
 
@@ -646,7 +657,7 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 					const int s2 = (tmp2 < 0) ? -1 : 1;
 					const int j2 = int(tmp2 * s2 - 1);
 
-					//	#pragma omp critical
+					#pragma omp critical
 					A[j1*maxele + j2] += double(1 / (4 * PI))*double(s1 * s2) * alok1[i1 * 3 + i2];
 				}
 			}

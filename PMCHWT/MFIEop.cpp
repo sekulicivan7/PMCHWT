@@ -8,6 +8,7 @@
 #include "Products.h"
 #include <complex>
 #include "MFIEop.h"
+#include <omp.h>
 
 
 #define COMPLEX complex<double>
@@ -21,71 +22,6 @@
 using namespace std;
 
 namespace MFIE{
-
-double* rho = new double[3];
-double* rho0N = new double[3];
-double* rho1 = new double[3];
-double* rho2 = new double[3];
-double* rho3 = new double[3];
-double* l1 = new double[3];
-double* l2 = new double[3];
-double* l3 = new double[3];
-double* RWGf = new double[3];
-double* RWGs = new double[3];
-COMPLEX* Ikon = new COMPLEX[3];// finish integral
-double* POM = new double[3];
-
-double* KK = new double[3];
-double* npom1 = new double[3];
-double* npom2 = new double[3];
-double* npom3 = new double[3];
-double* POM1 = new double[3];
-double* POM2 = new double[3];
-
-vector<double> fielpoin(3);
-vector<double> sourcepoin(3);
-double* u1 = new double[3];
-double* u2 = new double[3];
-double* u3 = new double[3];
-vector<double*> Pnulvec(3);
-vector<double*> U(3);
-
-vector<double> Lpl(3);
-vector<double> Lmn(3);
-vector<double> Pnul(3);
-vector<double> Ppl(3);
-vector<double> Pmn(3);
-vector<double> D(3);
-vector<double> Rnul(3);
-vector<double> Rpl(3);
-vector<double> Rmn(3);
-
-double* rhotmp = new double[3];
-vector<COMPLEX> alok1(9), alok2(9), alok3(9);
-
-double* vecpom = new double[3];
-double *p1nulvec = new double[3];
-double *p2nulvec = new double[3];
-double *p3nulvec = new double[3];
-double* pomVEC = new double[3];
-double* pomocvF = new double[3];
-double* pomocvS = new double[3];
-double* pomNvec = new double[3];
-double* pomVec1 = new double[3];
-COMPLEX* pomVec2 = new COMPLEX[3];
-COMPLEX* pomVec3 = new COMPLEX[3];
-COMPLEX* pomVec4 = new COMPLEX[3];
-double* pomVec5 = new double[3];
-double* pomVec6 = new double[3];
-
-double *Ivec1R = new double[3];
-double *Ivec1R3 = new double[3];
-double* Rivec = new double[3];
-COMPLEX* Ikon1R = new COMPLEX[3];
-double* Ikon1R3 = new double[3];
-
-COMPLEX* KROSS1 = new COMPLEX[3];
-double* KROSS2 = new double[3];
 
 
 
@@ -125,6 +61,73 @@ void singularityMFIE(double &det1, double &AR1, double &AR2, double* p1, double*
 	double Isca1R;
 	double Isca1R3;
 	double K;
+	
+	
+double rho[3];
+double rho0N[3];
+double rho1[3];
+double rho2[3];
+double rho3[3];
+double l1[3];
+double l2[3];
+double l3[3];
+double RWGf[3];
+COMPLEX Ikon[3];// finish integral
+double POM[3];
+
+double KK[3];
+double npom1[3];
+double npom2[3];
+double npom3[3];
+double POM1[3];
+double POM2[3];
+
+vector<double> fielpoin(3);
+
+double u1[3];
+double u2[3];
+double u3[3];
+
+vector<double*> Pnulvec(3);
+vector<double*> U(3);
+
+vector<double> Lpl(3);
+vector<double> Lmn(3);
+vector<double> Pnul(3);
+vector<double> Ppl(3);
+vector<double> Pmn(3);
+vector<double> D(3);
+vector<double> Rnul(3);
+vector<double> Rpl(3);
+vector<double> Rmn(3);
+
+double rhotmp[3];
+
+double vecpom[3];
+double p1nulvec[3];
+double p2nulvec[3];
+double p3nulvec[3];
+double pomVEC[3];
+double pomocvF[3];
+double pomNvec[3];
+double pomVec1[3];
+
+COMPLEX pomVec2[3];
+COMPLEX pomVec3[3];
+COMPLEX pomVec4[3];
+
+double pomVec5[3];
+double pomVec6[3];
+
+double Ivec1R[3];
+double Ivec1R3[3];
+double Rivec[3];
+COMPLEX Ikon1R[3];
+double Ikon1R3[3];
+
+COMPLEX KROSS1[3];
+	
+	
 
 	K = dot(&nvec2[0], &q1[0]);
 
@@ -500,9 +503,7 @@ void singularityMFIE(double &det1, double &AR1, double &AR2, double* p1, double*
 
 				cross(KROSS1, Rivec, Ikon);
 
-				KROSS2= RWGf;
-
-				alok2[i * 3 + j] = alok2[i * 3 + j] + wf*det1*(dot(KROSS2, KROSS1));
+				alok2[i * 3 + j] = alok2[i * 3 + j] + wf*det1*(dot(RWGf, KROSS1));
 
 			}
 		}
@@ -524,16 +525,22 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 
 	vector<double> WeightsS = points.getWeightsS();
 
-	// Inicijalizacija pomocnih promenljivih
-
-	double* CROSS1 = new double[3];
-	double* CROSS2 = new double[3];
-	double* Rvec = new double[3];
-
-	//#pragma omp parallel for
-
+	#pragma omp parallel for
 	for (int ele1 = 0; ele1 < Nt; ++ele1)
 	{
+	
+	//inic varijabli
+	double RWGs[3];
+	double RWGf[3];
+	double CROSS1[3];
+	double Rvec[3];
+	vector<double> sourcepoin(3);
+	vector<double> fielpoin(3);
+	vector<COMPLEX> alok1(9), alok2(9), alok3(9);
+	double pomocvS[3];
+	double pomocvF[3];
+	double Rivec[3];
+	
 		int* n1 = mesh.getNOvertex(ele1);
 		
 		double*p1 = mesh.getCoord(n1[0]);
@@ -638,9 +645,8 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 
 
 								cross(CROSS1, Rvec, RWGs);
-								CROSS2 = CROSS1;
 
-								alok1[i * 3 + j] = alok1[i * 3 + j] + wf*ws*det1*det2*(GradGreen*dot(RWGf, CROSS2));
+								alok1[i * 3 + j] = alok1[i * 3 + j] + wf*ws*det1*det2*(GradGreen*dot(RWGf, CROSS1));
 							}
 						}
 					}
@@ -712,9 +718,8 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 								subtract(Rivec, &fielpoin[0], q);
 
 								cross(CROSS1, Rivec, RWGs);
-								CROSS2= RWGf;
 
-								alok1[i * 3 + j] = alok1[i * 3 + j] + wf*ws*det1*det2*(GradGreenNS*dot(CROSS1, CROSS2));
+								alok1[i * 3 + j] = alok1[i * 3 + j] + wf*ws*det1*det2*(GradGreenNS*dot(CROSS1, RWGf));
 
 							}
 						}
@@ -743,7 +748,7 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 					const int s2 = (tmp2 < 0) ? -1 : 1;
 					const int j2 = int(tmp2 * s2 - 1);
 
-					//	#pragma omp critical
+					#pragma omp critical
 					A[j1*maxele + j2] += double(1 / (4 * PI))*double(s1 * s2) * alok1[i1 * 3 + i2];
 				}
 			}
