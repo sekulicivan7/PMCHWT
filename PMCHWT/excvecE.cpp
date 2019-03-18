@@ -7,7 +7,7 @@
 #include "math.h"
 #include "Trianinfo.h"
 #include "Products.h"
-#include "excvecH.h"
+#include "excvecE.h"
 
 #define COMPLEX complex<double>
 

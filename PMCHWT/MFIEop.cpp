@@ -180,9 +180,9 @@ void singularityMFIE(double &det1, double &AR1, double &AR2, double* p1, double*
 
 		double N0 = 1.0 - N1 - N2;
 
-		fielpoin[0] = *p1*N1 + *p2*N2 + *p3*N0;
-		fielpoin[1] = *(p1 + 1)*N1 + *(p2 + 1)*N2 + *(p3 + 1)*N0;
-		fielpoin[2] = *(p1 + 2)*N1 + *(p2 + 2)*N2 + *(p3 + 2)*N0;
+		fielpoin[0] = p1[0]*N1 + p2[0]*N2 + p3[0]*N0;
+		fielpoin[1] = p1[1]*N1 + p2[1]*N2 + p3[1]*N0;
+		fielpoin[2] = p1[2]*N1 + p2[2]*N2 + p3[2]*N0;
 
 		K = dot(&nvec2[0], &fielpoin[0]);
 
@@ -536,11 +536,11 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 	{
 		int* n1 = mesh.getNOvertex(ele1);
 		
-		double*p1 = mesh.getCoord(*n1);
+		double*p1 = mesh.getCoord(n1[0]);
 		
-		double* p2 = mesh.getCoord(*(n1 + 1));
+		double* p2 = mesh.getCoord(n1[1]);
 		
-		double* p3 = mesh.getCoord(*(n1 + 2));
+		double* p3 = mesh.getCoord(n1[2]);
 
 		vector<int> rwg1 = mesh.getRWG(ele1);
 
@@ -563,11 +563,11 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 
 			int* n2 = mesh.getNOvertex(ele2);
 			
-			double* q1 = mesh.getCoord(*n2);
+			double* q1 = mesh.getCoord(n2[0]);
 			
-			double* q2 = mesh.getCoord(*(n2 + 1));
+			double* q2 = mesh.getCoord(n2[1]);
 			
-			double* q3 = mesh.getCoord(*(n2 + 2));
+			double* q3 = mesh.getCoord(n2[2]);
 
 			vector<int> rwg2 = mesh.getRWG(ele2);
 			
@@ -592,9 +592,9 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 
 					double wf = WeightsNS[nf];
 
-					fielpoin[0] = *p1*N1 + *p2*N2 + *p3*N0;
-					fielpoin[1] = *(p1 + 1)*N1 + *(p2 + 1)*N2 + *(p3 + 1)*N0;
-					fielpoin[2] = *(p1 + 2)*N1 + *(p2 + 2)*N2 + *(p3 + 2)*N0;
+					fielpoin[0] = p1[0]*N1 + p2[0]*N2 + p3[0]*N0;
+					fielpoin[1] = p1[1]*N1 + p2[1]*N2 + p3[1]*N0;
+					fielpoin[2] = p1[2]*N1 + p2[2]*N2 + p3[2]*N0;
 
 					for (int ns = 0; ns != 7; ++ns) {
 
@@ -604,9 +604,9 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 
 						double ws = WeightsNS[ns];
 
-						sourcepoin[0] = *q1*N1 + *q2*N2 + *q3*(N0);
-						sourcepoin[1] = *(q1 + 1)*N1 + *(q2 + 1)*N2 + *(q3 + 1)*(N0);
-						sourcepoin[2] = *(q1 + 2)*N1 + *(q2 + 2)*N2 + *(q3 + 2)*(N0);
+						sourcepoin[0] = q1[0]*N1 + q2[0]*N2 + q3[0]*(N0);
+						sourcepoin[1] = q1[1]*N1 + q2[1]*N2 + q3[1]*(N0);
+						sourcepoin[2] = q1[2]*N1 + q2[2]*N2 + q3[2]*(N0);
 
 
 						double R = norm(&fielpoin[0], &sourcepoin[0]);
@@ -661,9 +661,9 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 					double N0 = 1.0 - N1 - N2;
 					double wf = WeightsS[nf];
 
-					fielpoin[0] = *p1*N1 + *p2*N2 + *p3*N0;
-					fielpoin[1] = *(p1 + 1)*N1 + *(p2 + 1)*N2 + *(p3 + 1)*N0;
-					fielpoin[2] = *(p1 + 2)*N1 + *(p2 + 2)*N2 + *(p3 + 2)*N0;
+					fielpoin[0] = p1[0]*N1 + p2[0]*N2 + p3[0]*N0;
+					fielpoin[1] = p1[1]*N1 + p2[1]*N2 + p3[1]*N0;
+					fielpoin[2] = p1[2]*N1 + p2[2]*N2 + p3[2]*N0;
 
 					for (int ns = 0; ns != 12; ++ns) {
 
@@ -672,9 +672,9 @@ void assemble_system_matrixMFIE(vector<COMPLEX> &A, Mesh &mesh, vector<Trianinfo
 						N0 = 1.0 - N1 - N2;
 						double ws = WeightsS[ns];
 
-						sourcepoin[0] = *q1*N1 + *q2*N2 + *q3*(N0);
-						sourcepoin[1] = *(q1 + 1)*N1 + *(q2 + 1)*N2 + *(q3 + 1)*(N0);
-						sourcepoin[2] = *(q1 + 2)*N1 + *(q2 + 2)*N2 + *(q3 + 2)*(N0);
+						sourcepoin[0] = q1[0]*N1 + q2[0]*N2 + q3[0]*(N0);
+						sourcepoin[1] = q1[1]*N1 + q2[1]*N2 + q3[1]*(N0);
+						sourcepoin[2] = q1[2]*N1 + q2[2]*N2 + q3[2]*(N0);
 
 
 						double R = norm(&fielpoin[0], &sourcepoin[0]);

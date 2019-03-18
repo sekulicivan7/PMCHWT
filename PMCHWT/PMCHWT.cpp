@@ -4,7 +4,6 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-//#include <iomanip>
 #include "Mesh.h"
 #include "Points.h"
 #include "math.h"
@@ -15,6 +14,7 @@
 #include "EFIEop.h"
 #include "excvecH.h"
 #include "excvecE.h"
+#include <time.h>
 #include <Eigen/Dense>
 
 #define COMPLEX complex<double>
@@ -46,6 +46,9 @@ int main()
 	double num1 = 0;
 	int num2 = 0;
 	int num3 = 0;
+	
+	clock_t start, end;
+    double cpu_time_used;
 
 	while (file1 >> num1) {
 		coord.emplace_back(num1);
@@ -136,7 +139,8 @@ int main()
 	Points points;
 	cout << "Calculating .." << endl;
 	
-
+    start = clock();
+    
 	EFIE::assemble_system_matrixEFIE(A1E, mesh, Triangles, points, Nt, maxele, k0, eta0);
 	EFIE::assemble_system_matrixEFIE(A2E, mesh, Triangles, points, Nt, maxele, k2, eta2);
 
@@ -146,6 +150,11 @@ int main()
 	EFIE::excEFIE::assemble_exic_vector(E, mesh, Triangles, points, Nt, k0);
 	MFIE::excMFIE::assemble_exic_vector(H, mesh, Triangles, points, Nt, k0, eta0);
 	
+	end = clock();
+	
+	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+	
+	cout << "System matrix assembling," << cpu_time_used << endl; 
 
 	for (int i = 0; i < maxele; ++i) {
 	 
@@ -166,7 +175,13 @@ int main()
 	A.block(maxele, 0, maxele, maxele) = eta0*A21;
 	A.block(maxele, maxele, maxele, maxele) =pow(eta0,2)*A22;
 	
+	start = clock();
 	B = A.colPivHouseholderQr().solve(C);
+	end = clock();
+	
+	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+	
+	cout << "Linear system solving," << cpu_time_used << endl;
 	
 	B.tail(maxele)=eta0*B.tail(maxele);
 	
