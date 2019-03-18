@@ -176,11 +176,18 @@ int main()
 	A.block(maxele, 0, maxele, maxele) = eta0*A21;
 	A.block(maxele, maxele, maxele, maxele) =pow(eta0,2)*A22;
 	
-	start = clock();
-	B = A.colPivHouseholderQr().solve(C);
-	end = clock();
 	
-	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+
+	
+	start = omp_get_wtime();
+	
+    B = A.partialPivLu().solve(C);//B = A.colPivHouseholderQr().solve(C);
+     
+	end = omp_get_wtime();
+	
+
+	
+	cpu_time_used = ((double) (end - start));
 	
 	cout << "Linear system solving," << cpu_time_used << endl;
 	
