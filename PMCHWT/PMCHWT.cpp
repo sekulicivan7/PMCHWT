@@ -15,8 +15,9 @@
 #include "EFIEop.h"
 #include "excvecH.h"
 #include "excvecE.h"
+#include <time.h>
 #include <Eigen/Dense>
-
+#include <omp.h>
 
 #define COMPLEX complex<double>
 
@@ -98,6 +99,10 @@ int main(int args, char *argv[]) {
 	double num1 = 0;
 	int num2 = 0;
 	int num3 = 0;
+	
+	clock_t start, end;
+    double cpu_time_used;
+    
 	if (my_rank == 0) {
 
 		ifstream file1("coord.txt");
@@ -251,12 +256,20 @@ int main(int args, char *argv[]) {
 		MatrixXCPL A(2 * maxele, 2 * maxele);
 		VectorXCPL C(2*maxele);
 		VectorXCPL B(2*maxele);
+		
+		 start = omp_get_wtime();
 
 		receive_data(A1Eg, A2Eg, A1Mg, A2Mg, SIZE, numprocs);
 		
 		
 		EFIE::excEFIE::assemble_exic_vector(E, mesh, Triangles, points, Nt, k0);
 	    MFIE::excMFIE::assemble_exic_vector(H, mesh, Triangles, points, Nt, k0, eta0);
+	    
+	    end = omp_get_wtime();
+	
+		cpu_time_used = ((double) (end - start));
+	
+		cout << "System matrix assembling," << cpu_time_used << endl; 
 
 
 		for (int i = 0; i < maxele; ++i) {
@@ -278,9 +291,19 @@ int main(int args, char *argv[]) {
 		A.block(maxele, 0, maxele, maxele) = eta0*A21;
 		A.block(maxele, maxele, maxele, maxele) =pow(eta0,2)*A22;
 		
-		cout<<"tu sam"<<endl;
 
-		B = A.colPivHouseholderQr().solve(C);
+	start = omp_get_wtime();
+	
+    B = A.partialPivLu().solve(C);//B = A.colPivHouseholderQr().solve(C);
+     
+	end = omp_get_wtime();
+	
+
+	
+	cpu_time_used = ((double) (end - start));
+	
+	cout << "Linear system solving," << cpu_time_used << endl;
+	
 	
 	B.tail(maxele)=eta0*B.tail(maxele);
 	

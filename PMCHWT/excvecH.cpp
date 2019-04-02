@@ -8,6 +8,7 @@
 #include "Trianinfo.h"
 #include "Products.h"
 #include "excvecH.h"
+#include <omp.h>
 
 #define COMPLEX complex<double>
 
@@ -24,22 +25,13 @@ namespace MFIE{
 
 namespace excMFIE{
 
-double* RWGf = new double[3];
-
-double* pomocvF = new double[3];
-
-vector<COMPLEX> alok1exvec(3);
-
-double* k_i =new double [3];
-
-double* h_i =new double [3];
-
-vector<double> fielpoin(3);
-
 void assemble_exic_vector(vector<COMPLEX> &C, Mesh &mesh, vector<Trianinfo> &Triangles, Points &points, int Nt, COMPLEX k, COMPLEX eta)
 {
-			
-	
+
+	double k_i[3];
+
+	double h_i[3];
+
 	const vector<vector<double>> PointsNS = points.getPointsNS();
 
 	const vector<double> WeightsNS = points.getWeightsNS();
@@ -52,8 +44,17 @@ void assemble_exic_vector(vector<COMPLEX> &C, Mesh &mesh, vector<Trianinfo> &Tri
 	h_i[0] = 0.0;
 	h_i[1] = 1.0;
 	h_i[2] = 0.0;
+	
+	#pragma omp parallel for
+	for (unsigned int ele1 = 0; ele1 < Nt; ++ele1) {
+	
+	double RWGf[3];
 
-	for (unsigned int ele1 = 0; ele1 != Nt; ++ele1) {
+	double pomocvF[3];
+
+	vector<COMPLEX> alok1exvec(3);
+	
+	vector<double> fielpoin(3);
 	
        const int* n1 = mesh.getNOvertex(ele1);
 		
@@ -110,6 +111,7 @@ void assemble_exic_vector(vector<COMPLEX> &C, Mesh &mesh, vector<Trianinfo> &Tri
 			
 			const int j1 = int(tmp1 * s1 - 1);
 			
+			#pragma omp critical	
 			C[j1] += double(s1) * alok1exvec[i1];
 			
 		}

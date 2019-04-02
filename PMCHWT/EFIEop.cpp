@@ -9,6 +9,7 @@
 #include "Products.h"
 #include <complex>
 #include "EFIEop.h"
+#include <omp.h>
 
 #define COMPLEX complex<double>
 
@@ -22,61 +23,7 @@ using namespace std;
 
 namespace EFIE{
 
- double* rho = new double[3];
-double* rho0N= new double[3];
-double* rho1 = new double[3];
-double* rho2 = new double[3];
-double* rho3 = new double[3];
-double* l1 = new double[3];
-double* l2 = new double[3];
-double* l3 = new double[3];
-double* RWGf = new double[3];
-double* RWGs = new double[3];
-double* Ikon = new double[3];
-double* POM = new double[3];
-
-double* KK = new double[3];
-double* npom1 = new double[3];
-double* npom2 = new double[3];
-double* npom3 = new double[3];
-double* POM1 = new double[3];
-double* POM2 = new double[3];
-
-vector<double> fielpoin(3);
-vector<double> sourcepoin(3);
-double* u1= new double[3];
-double* u2 = new double[3];
-double* u3 = new double[3];
-vector<double*> Pnulvec(3);
-vector<double*> U(3);
-
-vector<double> Lpl(3);
-vector<double> Lmn(3);
-vector<double> Pnul(3);
-vector<double> Ppl(3);
-vector<double> Pmn(3);
-vector<double> D(3);
-vector<double> Rnul(3);
-vector<double> Rpl(3);
-vector<double> Rmn(3);
-
-double* rhotmp = new double[3];
-vector<COMPLEX> alok1(9), alok2(9);
-
-double* vecpom = new double[3];
-double *p1nulvec = new double[3];
-double *p2nulvec = new double[3];
-double *p3nulvec = new double[3];
-double* pomVEC = new double[3];
-double* pomocvF = new double[3];
-double* pomocvS = new double[3];
-double* pomNvec = new double[3];
-double* pomVec1 = new double[3];
-double* pomVec2 = new double[3];
-
-double *Ivec = new double[3];
-
-
+ 
 bool is_regular(const Trianinfo &trianF, const Trianinfo &trianS)
 {
 	vector<double> cp1 = trianF.getcp();
@@ -94,6 +41,61 @@ void singularityEFIE(double &det1, double &AR1, double &AR2, double* p1, double*
 	Mesh &mesh, COMPLEX k, COMPLEX eta, vector<COMPLEX> &alok2) {
 	
 //inicijalizacija varijabli	
+
+double rho[3];
+double rho0N[3];
+double rho1[3];
+double rho2[3];
+double rho3[3];
+double l1[3];
+double l2[3];
+double l3[3];
+double RWGf[3];
+
+double Ikon[3];
+double POM[3];
+
+double KK[3];
+double npom1[3];
+double npom2[3];
+double npom3[3];
+double POM1[3];
+double POM2[3];
+
+vector<double> fielpoin(3);
+
+double u1[3];
+double u2[3];
+double u3[3];
+vector<double*> Pnulvec(3);
+vector<double*> U(3);
+
+vector<double> Lpl(3);
+vector<double> Lmn(3);
+vector<double> Pnul(3);
+vector<double> Ppl(3);
+vector<double> Pmn(3);
+vector<double> D(3);
+vector<double> Rnul(3);
+vector<double> Rpl(3);
+vector<double> Rmn(3);
+
+double rhotmp[3];
+
+double vecpom[3];
+double p1nulvec[3];
+double p2nulvec[3];
+double p3nulvec[3];
+double pomVEC[3];
+double pomocvF[3];
+double pomNvec[3];
+double pomVec1[3];
+double pomVec2[3];
+
+double Ivec[3];
+
+
+
 double CONST1;
 double CONST2;
 double Isca;
@@ -102,6 +104,7 @@ double LOGmn;
 double ATANpl;
 double ATANmn;
 double K;
+
 
 
 	K = dot(&nvec2[0], &q1[0]);
@@ -163,9 +166,9 @@ double K;
 
 		double N0 = 1.0 - N1 - N2;
 
-		fielpoin[0] = *p1*N1 + *p2*N2 + *p3*N0;
-		fielpoin[1] = *(p1 + 1)*N1 + *(p2 + 1)*N2 + *(p3 + 1)*N0;
-		fielpoin[2] = *(p1 + 2)*N1 + *(p2 + 2)*N2 + *(p3 + 2)*N0;
+		fielpoin[0] = p1[0]*N1 + p2[0]*N2 + p3[0]*N0;
+		fielpoin[1] = p1[1]*N1 + p2[1]*N2 + p3[1]*N0;
+		fielpoin[2] = p1[2]*N1 + p2[2]*N2 + p3[2]*N0;
 
 		K = dot(&nvec2[0], &fielpoin[0]);
 
@@ -461,17 +464,27 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 		gran2 = Nt;
 	}
 
-	//#pragma omp parallel for
-
+	#pragma omp parallel for
 	for (int ele1 = gran1; ele1 < gran2; ++ele1)
 	{
+	
+	     //inicijalizacija lokalnih varijabli
+	     double pomocvS[3];
+	     double pomocvF[3];
+	     double RWGs[3];
+		 double RWGf[3];
+		vector<double> sourcepoin(3);
+		vector<double> fielpoin(3);
+		vector<COMPLEX> alok1(9);
+		vector<COMPLEX> alok2(9);
+	     
 		int* n1 = mesh.getNOvertex(ele1);
 	
-		double*p1 = mesh.getCoord(*n1);
+		double*p1 = mesh.getCoord(n1[0]);
 
-		double* p2 = mesh.getCoord(*(n1 + 1));
+		double* p2 = mesh.getCoord(n1[1]);
 	
-		double* p3 = mesh.getCoord(*(n1 + 2));
+		double* p3 = mesh.getCoord(n1[2]);
 
 
 		vector<int> rwg1 = mesh.getRWG(ele1);
@@ -479,8 +492,6 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 		Trianinfo trianF = Triangles[ele1];
 		double det1 = trianF.getDeter();
 		double AR1 = det1 / 2.0;
-
-
 
 		for (int ele2 = 0; ele2 != Nt; ++ele2) {
 
@@ -491,11 +502,11 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 
 			int* n2 = mesh.getNOvertex(ele2);
 		
-			double* q1 = mesh.getCoord(*n2);
+			double* q1 = mesh.getCoord(n2[0]);
 	
-			double* q2 = mesh.getCoord(*(n2 + 1));
+			double* q2 = mesh.getCoord(n2[1]);
 		
-			double* q3 = mesh.getCoord(*(n2 + 2));
+			double* q3 = mesh.getCoord(n2[2]);
 
 			vector<int> rwg2 = mesh.getRWG(ele2);
 			
@@ -519,9 +530,9 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 
 					double wf = WeightsNS[nf];
 
-					fielpoin[0] = *p1*N1 + *p2*N2 + *p3*N0;
-					fielpoin[1] = *(p1 + 1)*N1 + *(p2 + 1)*N2 + *(p3 + 1)*N0;
-					fielpoin[2] = *(p1 + 2)*N1 + *(p2 + 2)*N2 + *(p3 + 2)*N0;
+					fielpoin[0] = p1[0]*N1 + p2[0]*N2 + p3[0]*N0;
+					fielpoin[1] = p1[1]*N1 + p2[1]*N2 + p3[1]*N0;
+					fielpoin[2] = p1[2]*N1 + p2[2]*N2 + p3[2]*N0;
 
 					for (int ns = 0; ns != 7; ++ns) {
 
@@ -530,9 +541,9 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 						N0 = 1.0 - N1 - N2;
 						double ws = WeightsNS[ns];
 
-						sourcepoin[0] = *q1*N1 + *q2*N2 + *q3*(N0);
-						sourcepoin[1] = *(q1 + 1)*N1 + *(q2 + 1)*N2 + *(q3 + 1)*(N0);
-						sourcepoin[2] = *(q1 + 2)*N1 + *(q2 + 2)*N2 + *(q3 + 2)*(N0);
+						sourcepoin[0] = q1[0]*N1 + q2[0]*N2 + q3[0]*(N0);
+						sourcepoin[1] = q1[1]*N1 + q2[1]*N2 + q3[1]*(N0);
+						sourcepoin[2] = q1[2]*N1 + q2[2]*N2 + q3[2]*(N0);
 
 
 						double R = norm(&fielpoin[0], &sourcepoin[0]);
@@ -583,9 +594,9 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 
 					double wf = WeightsS[nf];
 
-					fielpoin[0] = *p1 * N1 + *p2 * N2 + *p3 * N0;
-					fielpoin[1] = *(p1 + 1) * N1 + *(p2 + 1) * N2 + *(p3 + 1) * N0;
-					fielpoin[2] = *(p1 + 2) * N1 + *(p2 + 2) * N2 + *(p3 + 2) * N0;
+					fielpoin[0] = p1[0]*N1 + p2[0]*N2 + p3[0]*N0;
+					fielpoin[1] = p1[1]*N1 + p2[1]*N2 + p3[1]*N0;
+					fielpoin[2] = p1[2]*N1 + p2[2]*N2 + p3[2]*N0;
 
 
 					for (int ns = 0; ns != 12; ++ns) {
@@ -596,9 +607,9 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 
 						double ws = WeightsS[ns];
 
-						sourcepoin[0] = *q1*N1 + *q2*N2 + *q3*(N0);
-						sourcepoin[1] = *(q1 + 1)*N1 + *(q2 + 1)*N2 + *(q3 + 1)*(N0);
-						sourcepoin[2] = *(q1 + 2)*N1 + *(q2 + 2)*N2 + *(q3 + 2)*(N0);
+						sourcepoin[0] = q1[0]*N1 + q2[0]*N2 + q3[0]*(N0);
+						sourcepoin[1] = q1[1]*N1 + q2[1]*N2 + q3[1]*(N0);
+						sourcepoin[2] = q1[2]*N1 + q2[2]*N2 + q3[2]*(N0);
 
 						double R = norm(&fielpoin[0], &sourcepoin[0]);
 					
@@ -662,7 +673,7 @@ void assemble_system_matrixEFIE(vector<COMPLEX> &Alocal, Mesh &mesh, vector<Tria
 					const int s2 = (tmp2 < 0) ? -1 : 1;
 					const int j2 = int(tmp2 * s2 - 1);
 
-					//	#pragma omp critical
+					#pragma omp critical
 					Alocal[j1*maxele + j2] += double(1 / (4 * PI))*double(s1 * s2) * alok1[i1 * 3 + i2];
 				}
 			}
